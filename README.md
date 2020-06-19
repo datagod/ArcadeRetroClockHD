@@ -8,7 +8,10 @@ A retro themed clock that plays 9 mini-games.  Written in Python, runs on a Rspb
 
 
 
-
+Requirements:
+Raspberry Pi (supports Zero, 2, 3, 4 and variations)
+Python3
+Unicorn Hat HD (https://shop.pimoroni.com/products/unicorn-hat-hd)
 
 Setup:
 Once you have the pimoroni UnicornHat running on your raspberry pi, download and install the Arcade Retro Clock software.

@@ -2,11 +2,9 @@
 A retro themed clock that plays 9 mini-games.  Written in Python, runs on a Rspberry Pi with the UnicornHD Hat (16x).
 
 
-![HD Clock](http://arcaderetroclock.s3.amazonaws.com/images/HDClock2.jpg | width=100)
-
-![HD Clock](http://arcaderetroclock.s3.amazonaws.com/images/HDClock1.jpg)
-
-![HD Clock](http://arcaderetroclock.s3.amazonaws.com/images/HDClock3.jpg)
+![HD Clock](http://arcaderetroclock.s3.amazonaws.com/images/Clock2.jpg)
+![HD Clock](http://arcaderetroclock.s3.amazonaws.com/images/Clock1.jpg)
+![HD Clock](http://arcaderetroclock.s3.amazonaws.com/images/Clock3.jpg)
 
 
 

@@ -80,3 +80,11 @@ Inspired by RallyX arcade game.
 **Orbits (future)**<br>
 I decided to get into properly calculating momentum, gravity, inertia, etc.  It is a fairly straighforward concept and I have built solar system simulators before.  I just ran out of steam.  Once I get back into it, this will be amazing.  I have so many ideas but the first one will likely be some sort of pinball game.
 
+
+
+** Legacy Code **
+This evolved out of a simple pacman clone while I was brand new to Python.  The PacDot code is a mish mash of concepts and is a bit of a mess.  The most recent game added is Outbreak which I believe has much better game architecutre.
+
+There are global variables and parameters sprinkled around that I am still cleaning up.  This is a huge project that I worked on for fun.  I will continue to tidy up the code and isolate the games into their own includable files.
+
+ArcadeFunctions.py is supposed to only have code that is common to all the games, such as the pre-defined sprites, scrolling animations, etc.  It can be used in other projects as well on its own.  I use it in my GPSProbe project.

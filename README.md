@@ -2,13 +2,13 @@
 A retro themed clock that plays 9 mini-games.  Written in Python, runs on a Rspberry Pi with the UnicornHD Hat (16x).
 
 
-![HD Clock](http://arcaderetroclock.s3.amazonaws.com/images/Clock2.jpg)
-![HD Clock](http://arcaderetroclock.s3.amazonaws.com/images/Clock1.jpg)
-![HD Clock](http://arcaderetroclock.s3.amazonaws.com/images/Clock3.jpg)
+![HD Clock](http://arcaderetroclock.s3.amazonaws.com/images/Clock2.jpg)(https://youtu.be/Ybx1iZNYNkM)
+![HD Clock](http://arcaderetroclock.s3.amazonaws.com/images/Clock1.jpg)(https://youtu.be/Ybx1iZNYNkM)
+![HD Clock](http://arcaderetroclock.s3.amazonaws.com/images/Clock3.jpg)(https://youtu.be/Ybx1iZNYNkM)
 
 
 
-(https://youtu.be/Ybx1iZNYNkM)
+
 
 Setup:
 Once you have the pimoroni UnicornHat running on your raspberry pi, download and install the Arcade Retro Clock software.

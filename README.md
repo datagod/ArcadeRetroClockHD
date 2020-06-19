@@ -34,30 +34,30 @@ Here is a description of the games, and what inspired me:
 
 Inspired by the computer program "Game of Life".
 
-**PacDot**
+**PacDot**<br>
 My first game, very primitive.  Does not use my more advanced objects such as the playfield.  I was learning python as I went.
 Inspired by Pacman of course.
 
-**Wormdot**
+**Wormdot**<br>
 Just another snake game
 
-**Super Worms**
+**Super Worms**<br>
 Started out as a tron lightcycle game.  Morphed into what it is today.  Just something fun to watch.
 
-**DotInvaders**
+**DotInvaders**<br>
 Space invader clone.  The best part is the time.  You can modify the list of short words as well.  Right now it is some country codes and a few of my friends initials.
 
-**DotZerk**
+**DotZerk**<br>
 Green dot is a human trapped in a maze filled with killer robots.  Red dots are robots.  If the human takes too long to kill them, a worse robot shows up.
 Game has a lot of bugs, collision detection does not always work.  It is the first game I made with the "playfield" concept where every thing is an object on a playfield.  The program examines each object, not the color of the LED's themselves.
 
 Inspired by the Stern arcade game Berzerk.
 
-**SpaceDot**
+**SpaceDot**<br>
 Dumb name.  Based on Intellivision Astrosmash.  Ships cross the sky.  Asteroids fall from the sky.  Human ship is protecting the planet.  
 If the mother ship gets hit twice it gets angry and starts nuking.
 
-**RallyDot**
+**RallyDot**<br>
 This game really got out of hand with complexity.  It started out as a race car game where the dot in the middle is the player, and 8 other race cars try to catch him.  The speed is impressive.  On a raspberry pi 3 it can support 500+ enemy objects.
 
 Each enemy has health and the ability to take damage until they detonate.  The detonation damages nearby enemies which causes a chain reaction.  I am not sure at this point if they are race cars, zombies, or some sort of hybrid.  The maze is fairly straightforward to draw with numbers, you just need to imagine it as you go along.
@@ -67,6 +67,6 @@ The game world is larger than the display world, so there is plenty of off scree
 Inspired by RallyX arcade game.
 
 
-**Orbits (future)**
+**Orbits (future)**<br>
 I decided to get into properly calculating momentum, gravity, inertia, etc.  It is a fairly straighforward concept and I have built solar system simulators before.  I just ran out of steam.  Once I get back into it, this will be amazing.  I have so many ideas but the first one will likely be some sort of pinball game.
 

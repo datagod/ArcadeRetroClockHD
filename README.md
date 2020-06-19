@@ -32,7 +32,8 @@ Faster models will cause the display to move too fast to comfortably watch (stil
 * gamma (used to increase overall brightness -- for Ubercorn display which is somewhat dimmer than the regular small display)
 example:  sudo python ArcadeRetroClock.py 0.07 0.07 0.07 20 55 23 7 1
 
-
+*Note*
+The first five parameters are from when the clock was a simple pacman clone.  They will be removed at a later date.  For now just ignore them or use the settings included in the go.sh file.
 
 Here is a description of the games, and what inspired me:
 

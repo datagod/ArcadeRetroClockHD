@@ -2,7 +2,16 @@
 A retro themed clock that plays 9 mini-games.  Written in Python, runs on a Rspberry Pi with the UnicornHD Hat (16x).
 
 
-[![Scrolling Robots!](http://arcaderetroclock.s3.amazonaws.com/images/DotZerk%20little%20pic.jpg)](https://youtu.be/Ybx1iZNYNkM)
+[![HD Clock](http://arcaderetroclock.s3.amazonaws.com/images/Clock2.jpg)](https://youtu.be/Ybx1iZNYNkM)
+[![HD Clock](http://arcaderetroclock.s3.amazonaws.com/images/Clock1.jpg)](https://youtu.be/Ybx1iZNYNkM)
+[![HD Clock](http://arcaderetroclock.s3.amazonaws.com/images/Clock3.jpg)](https://youtu.be/Ybx1iZNYNkM)
+
+
+
+Requirements:
+Raspberry Pi (supports Zero, 2, 3, 4 and variations)
+Python3
+Unicorn Hat HD (https://shop.pimoroni.com/products/unicorn-hat-hd)
 
 Setup:
 Once you have the pimoroni UnicornHat running on your raspberry pi, download and install the Arcade Retro Clock software.
@@ -23,7 +32,8 @@ Faster models will cause the display to move too fast to comfortably watch (stil
 * gamma (used to increase overall brightness -- for Ubercorn display which is somewhat dimmer than the regular small display)
 example:  sudo python ArcadeRetroClock.py 0.07 0.07 0.07 20 55 23 7 1
 
-
+*Note*
+The first five parameters are from when the clock was a simple pacman clone.  They will be removed at a later date.  For now just ignore them or use the settings included in the go.sh file.
 
 Here is a description of the games, and what inspired me:
 
@@ -70,3 +80,11 @@ Inspired by RallyX arcade game.
 **Orbits (future)**<br>
 I decided to get into properly calculating momentum, gravity, inertia, etc.  It is a fairly straighforward concept and I have built solar system simulators before.  I just ran out of steam.  Once I get back into it, this will be amazing.  I have so many ideas but the first one will likely be some sort of pinball game.
 
+
+
+** Legacy Code **
+This evolved out of a simple pacman clone while I was brand new to Python.  The PacDot code is a mish mash of concepts and is a bit of a mess.  The most recent game added is Outbreak which I believe has much better game architecutre.
+
+There are global variables and parameters sprinkled around that I am still cleaning up.  This is a huge project that I worked on for fun.  I will continue to tidy up the code and isolate the games into their own includable files.
+
+ArcadeFunctions.py is supposed to only have code that is common to all the games, such as the pre-defined sprites, scrolling animations, etc.  It can be used in other projects as well on its own.  I use it in my GPSProbe project.

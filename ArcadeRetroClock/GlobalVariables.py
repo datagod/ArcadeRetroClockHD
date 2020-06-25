@@ -37,16 +37,17 @@ PacDotHighScore = 0
 #-----------------------------
 # Outbreak Global Variables --
 #-----------------------------
-replicationrate   = 2000
+replicationrate   = 200
 VirusTopSpeed     = 1
 VirusBottomSpeed  = 10
 MinBright         = 100
 MaxBright         = 255
 
-OriginalMutationRate      = 1000
-OriginalReplicationRate   = 1000
-FreakoutReplicationRate   = 10    #new replication rate when a virus freaksout
-FreakoutMoves             = 10000 #after this many moves, the viruses will replicate and mutate at a much greater rate
+OriginalMutationRate      = 100
+OriginalReplicationRate   = 100
+FreakoutReplicationRate   = 10   #new replication rate when a virus freaksout
+MaxVirusMoves             = 5000 #after this many moves the level is over
+FreakoutMoves             = 2500 #after this many moves, the viruses will replicate and mutate at a much greater rate
 OriginalMutationDeathRate = 20
 mutationrate      = 0
 mutationdeathrate = 0
@@ -57,7 +58,6 @@ ChanceOfSpeedup   = 1     #determines how often a lone virus will spontaneously 
 SlowTurnMinMoves  = 5     #number of moves a mutated virus moves before turning
 SlowTurnMaxMoves  = 25    #number of moves a mutated virus moves before turning
 VirusStartSpeed   = 20    #staring speed of the viruses
-MaxVirusMoves     = 25000 #after this many moves the level is over
 
 
 #----------------------------

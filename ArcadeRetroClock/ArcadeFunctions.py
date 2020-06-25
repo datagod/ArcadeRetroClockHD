@@ -33,6 +33,12 @@
 #   Date:    June 18, 2020                                                   --
 #   Reason:  General release                                                 --
 #------------------------------------------------------------------------------
+#   Version: 1.01                                                            --
+#   Date:    June 24, 2020                                                   --
+#   Changes:                                                                 --
+#    - adding ability to zoom when displaying a window                       --
+#                                                                            --
+#------------------------------------------------------------------------------
 
 import GlobalVariables as gv
 import unicornhathd as unicorn
@@ -982,7 +988,7 @@ class VirusWorld(object):
 
         elif (SDColor >=5):
           r,g,b =  ColorList[SDColor]
-          VirusName = str(r)+str(g)+str(b)
+          VirusName = str(r) + '-' + str(g) + '-' + str(b)
           
           #(h,v,dh,dv,r,g,b,direction,scandirection,speed,alive,lives,name,score,exploding,radarrange,destination,mutationtype,mutationrate, mutationfactor, replicationrate):
           self.Playfield[y][x] = Virus(x,y,x,y,r,g,b,1,1, self.VirusStartSpeed   ,1,10,VirusName,0,0,10,'West',0,self.mutationrate,0,self.replicationrate,self.mutationdeathrate)
@@ -1029,6 +1035,67 @@ class VirusWorld(object):
     
     unicorn.show()
     #SendBufferPacket(RemoteDisplay,gv.HatHeight,gv.HatWidth)
+
+  def DisplayWindow(self,h,v,ZoomFactor=0):
+    #This function accepts h,v coordinates for the entire map (e.g. 1,8  20,20,  64,64)    
+    #Displays what is on the playfield currently, including walls, cars, etc.
+    r = 0
+    g = 0
+    b = 0
+    count    = 0
+    
+    IndentFactor = 0    
+    HV_modifier = (1 / gv.HatHeight ) * ZoomFactor
+    NewWidth = round(gv.HatHeight * HV_modifier)
+
+    if (ZoomFactor > 1):
+      IndentFactor = (gv.HatWidth / 2) - (NewWidth /2)
+    else:
+      IndentFactor = 0
+
+    print("gv.HatWidth",gv.HatWidth," NewWidth",NewWidth," ZoomFactor:",ZoomFactor,"HV_modifier",HV_modifier, "IndentFactor:",IndentFactor)
+
+    for V in range(0,gv.HatWidth):
+      for H in range (0,gv.HatHeight):
+        #print ("DisplayWindow hv HV: ",h,v,H,V) 
+        name = self.Playfield[v+V][h+H].name
+        #print ("Display: ",name,V,H)
+        if (name == "EmptyObject"):
+          r = 0
+          g = 0
+          b = 0          
+
+        else:
+          r = self.Playfield[v+V][h+H].r
+          g = self.Playfield[v+V][h+H].g
+          b = self.Playfield[v+V][h+H].b
+          
+        #Our map is an array of arrays [v][h] but we draw h,v
+        if (ZoomFactor > 0):
+          setpixel((H * HV_modifier) + IndentFactor ,(V * HV_modifier) + IndentFactor,r,g,b)
+        else:
+          setpixel(H,V,r,g,b)
+    
+    unicorn.show()
+    #SendBufferPacket(RemoteDisplay,gv.HatHeight,gv.HatWidth)
+
+
+
+  def DisplayWindowZoom(self,h,v,Z1=8,Z2=1,ZoomSleep=0.05):
+
+
+
+    if (Z1 <= Z2):
+      for Z in range (Z1,Z2):
+        self.DisplayWindow(h,v,Z)
+        time.sleep(ZoomSleep)
+        
+    else:
+      for Z in reversed(range(Z2,Z1)):
+        unicorn.clear()        
+        self.DisplayWindow(h,v,Z)
+        time.sleep(ZoomSleep)
+        
 
 
             
@@ -1084,6 +1151,48 @@ class VirusWorld(object):
         if (name not in ("EmptyObject","Wall","WallBreakable")):
           count = count + 1
     return count;
+
+
+
+
+            
+  def DisplayWindowWithSprite(self,h,v,ClockSprite):
+    #This function accepts h,v coordinates for the entire map (e.g. 1,8  20,20,  64,64)    
+    #Displays what is on the playfield currently, including walls, cars, etc.
+    r = 0
+    g = 0
+    b = 0
+    count = 0
+        
+
+    for V in range(0,gv.HatWidth):
+      for H in range (0,gv.HatHeight):
+         
+        name = self.Playfield[v+V][h+H].name
+        #print ("Display: ",name,V,H)
+        if (name == "EmptyObject"):
+          r = 0
+          g = 0
+          b = 0          
+
+        else:
+          r = self.Playfield[v+V][h+H].r
+          g = self.Playfield[v+V][h+H].g
+          b = self.Playfield[v+V][h+H].b
+          
+        #Our map is an array of arrays [v][h] but we draw h,v
+        setpixel(H,V,r,g,b)
+
+    #Display clock at current location
+    #Clock hv will allow external functions to slide clock all over screen
+
+    #print ("Clock info  hv on: ",ClockSprite.h,ClockSprite.v,ClockSprite.on)
+    ClockSprite.CopySpriteToBuffer(ClockSprite.h,ClockSprite.v)
+        
+    unicorn.show()
+    #SendBufferPacket(RemoteDisplay,gv.HatHeight,gv.HatWidth)
+
+
 
 
 
@@ -1302,7 +1411,7 @@ class Virus(object):
     self.r              = r
     self.g              = g
     self.b              = b
-    self.name           = "" + str(self.r)+str(self.g)+str(self.b)
+    self.name           = "" + str(self.r) + ' - ' + str(self.g)+ ' - ' + str(self.b)
     self.mutationtype   = mutationtype
     self.mutationfactor = mutationfactor
     #print ("TheSpeed: ",self.speed)
@@ -3642,6 +3751,20 @@ ColonSprite = Sprite(
 
 
 
+DashSprite = Sprite(
+  3,
+  5,
+  RedR,
+  RedG,
+  RedB,
+  [0,0,0,0,
+   0,0,0,0,
+   0,1,1,0,
+   0,0,0,0,
+   0,0,0,0]
+)
+
+
 
 
 
@@ -5286,6 +5409,8 @@ def CreateBannerSprite(TheMessage):
     x = ord(c) -65
     if (c == '?'):
       BannerSprite = JoinSprite(BannerSprite, QuestionMarkSprite,0)
+    if (c == '-'):
+      BannerSprite = JoinSprite(BannerSprite, DashSprite,0)
     elif (c == '#'):
       BannerSprite = JoinSprite(BannerSprite, PoundSignSprite,0)
     elif (c == '.'):

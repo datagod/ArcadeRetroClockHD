@@ -34,6 +34,12 @@
 #   Date:    June 18, 2020                                                
 #   Reason:  General release
 #------------------------------------------------------------------------------
+#   Version: 1.01                                                            --
+#   Date:    June 24, 2020                                                   --
+#   Changes:                                                                 --
+#    - Outbreak maps now zoom in at start and zoom out at end                --
+#    - tinkered with orbits to get particles bouncing, will remain inactive  --
+#------------------------------------------------------------------------------
 
 
 
@@ -12886,8 +12892,9 @@ def PlayOutbreak():
 
   print ("CameraHV: ",CameraH, CameraV)
 
-  af.ShowScrollingBanner("Outbreak!",af.SDLowYellowR,af.SDLowYellowG,af.SDLowYellowB,gv.ScrollSleep *0.8)
-
+  #af.ShowScrollingBanner("Outbreak!",af.SDLowYellowR,af.SDLowYellowG,af.SDLowYellowB,gv.ScrollSleep *0.8)
+  DinnerPlate.DisplayWindowZoom(CameraH,CameraV,1,16,0.025)
+  
 
 
   NameCount = 1
@@ -13038,12 +13045,13 @@ def PlayOutbreak():
         time.sleep(1)
         #unicorn.off()
         FlashAllViruses(Viruses,VirusCount,DinnerPlate,CameraH,CameraV)
+        DinnerPlate.DisplayWindowZoom(CameraH,CameraV,16,1,0.025)
+
         af.ShowScrollingBanner2("Strain # " + firstname + " secured" ,(af.MedGreen),gv.ScrollSleep)
         
         #Prepare new level
-        DominanceCount  = 0
-        LevelCount      = random.randint(1,MaxLevel)
-        #mutationrate    = OriginalMutationRate
+        DominanceCount    = 0
+        LevelCount        = random.randint(1,MaxLevel)
         replicationrate   = gv.OriginalReplicationRate
         mutationdeathrate = gv.OriginalMutationDeathRate
         DinnerPlate       = CreateDinnerPlate(LevelCount)
@@ -13053,6 +13061,7 @@ def PlayOutbreak():
         VirusCount        = len(Viruses)
         ClockSprite       = af.CreateClockSprite(12)
         ClockSprite.on    = 0
+        DinnerPlate.DisplayWindowZoom(CameraH,CameraV,1,16,0.025)
       
         nextname = ""
     else:
@@ -13076,9 +13085,10 @@ def PlayOutbreak():
       DinnerPlate.DisplayWindowWithSprite(CameraH, CameraV, ClockSprite)
       MoveMessageSprite(gv.VirusMoves,ClockSprite)
     else:
-      DinnerPlate.DisplayWindow(CameraH, CameraV)
+     DinnerPlate.DisplayWindow(CameraH, CameraV)
     
-    
+      
+
     
     
     #-------------------------
@@ -13102,7 +13112,7 @@ def PlayOutbreak():
   #let the display show the final results before clearing
   time.sleep(3)
   unicorn.off()
-  
+  DinnerPlate.DisplayWindowZoom(CameraH,CameraV,16,1,0.025)
   af.ShowScrollingBanner2("Infection Cured!",(af.MedYellow),gv.ScrollSleep *0.8)
   af.ShowScrollingBanner2("Score: " + str(gv.VirusMoves) ,(af.MedGreen),gv.ScrollSleep *0.8)
   unicorn.off()
@@ -13162,9 +13172,43 @@ def ShowIPAddress():
 # - start small, build a framework then build maps/games based on that
 
 
+#
+
+# Perhaps particles can be very tiny, even though they are drawn on one LED.
+# Have a virtual grid of 1000x1000
+# - Movements are tracked on virtual grid and then converted to 16x16 co-ordinates 
+#   for drawing
+# - it is important to draw each LED as an entire object
+# - do we do collision detection on the playfield or in the virtual grid?
+# - I am thinking virtual grid is only for calculating smooth movements, collision 
+#   still takes place on the playfield
+# - when drawing on the playfield we have to calculate the virtual destination
+#   and use the turn towards 8 way functions to move on the playfield
+# - smooth animation is essential
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 class Particle(object):
   
-  def __init__(self,h,v,r,g,b,direction,scandirection,mass,speed,alive,lives,name,score,exploding,radarrange):
+  def __init__(self,h,v,r,g,b,direction,scandirection,alive,lives,name,score,exploding,radarrange,
+               mass,
+               velocity = 0,
+               acceleration = 0,
+               speed = 10
+               ):
 
     self.h               = h              # location on playfield (e.g. 10,35)
     self.v               = v              # location on playfield (e.g. 10,35)
@@ -13173,13 +13217,22 @@ class Particle(object):
     self.b               = b
     self.direction       = direction      #direction of travel
     self.scandirection   = scandirection  #direction of scanners, if equipped
-    self.mass            = mass
-    self.speed           = speed
     self.alive           = 1
     self.lives           = 3
     self.name            = name
     self.exploding       = 0
     self.radarrange      = 20
+    self.bottomspeed     = 50
+    self.topspeed        = 1
+
+
+    self.mass            = mass
+    self.velocity        = velocity
+    self.acceleration    = acceleration
+    self.speed           = speed
+    self.delta_h         = random.randint(-2, 2)
+    self.delta_v         = random.randint(-2, 2)
+
 
 
   def Display(self):
@@ -13200,10 +13253,10 @@ class Particle(object):
   def AdjustSpeed(self, increment):
     speed = self.speed
     speed = self.speed + increment
-    if (speed > ParticleBottomSpeed):
-      speed = ParticleBottomSpeed
-    elif (speed < ParticleTopSpeed):
-      speed = ParticleTopSpeed
+    if (speed > self.bottomspeed):
+      speed = self.bottomspeed
+    elif (speed < self.topspeed):
+      speed = self.topspeed
 
     self.speed = speed
     return;
@@ -13212,7 +13265,20 @@ class Particle(object):
 
 class ParticleWorld(object):
 #A world that contains a playfield, a map, and a bunch of particles
-  def __init__(self, name, width, height, Map, Playfield, CameraH, CameraV, Gravity = 1):
+#We will have one gravity source
+  def __init__(self, 
+               name, 
+               width, 
+               height, 
+               Map, 
+               Playfield, 
+               CameraH, 
+               CameraV, 
+               DisplayH, 
+               DisplayV, 
+               GravityH = 7,
+               GravityV = 7,
+               Gravity  = 10):
     self.name      = name
     self.width     = width
     self.height    = height
@@ -13220,6 +13286,9 @@ class ParticleWorld(object):
     self.Playfield = ([[]])
     self.CameraH   = CameraH
     self.CameraV   = CameraV
+    self.DisplayH     = DisplayH
+    self.DisplayV     = DisplayV
+
     self.Gravity   = Gravity   #Gravity of the world object, if required
     self.GravityH  = GravityH  #HV of the center of gravity
     self.GravityV  = GravityV  #HV of the center of gravity
@@ -13258,7 +13327,6 @@ class ParticleWorld(object):
           g = af.SDDarkWhiteG
           b = af.SDDarkWhiteB
           self.Playfield[y][x] = Particle(x,y,r,g,b,1,1,1,1,1,1,'Wall',0,0,10)
-          Particles.append(self.Playfield[y][x])
 
 
         elif (SDColor == 2):
@@ -13268,7 +13336,6 @@ class ParticleWorld(object):
                                     #(h,v,r,g,b,alive,lives,name):
           self.Playfield[y][x] = Particle(x,y,r,g,b,1,1,1,1,1,1,'Wall',0,0,10)
           #print ("Copying wallbreakable to playfield hv: ",y,x)
-          Particles.append(self.Playfield[y][x])
 
         elif (SDColor == 3):
           r = af.SDDarkWhiteR + 50
@@ -13277,7 +13344,6 @@ class ParticleWorld(object):
                                     #(h,v,r,g,b,alive,lives,name):
           self.Playfield[y][x] = Particle(x,y,r,g,b,1,1,1,1,1,1,'Wall',0,0,10)
           #print ("Copying wallbreakable to playfield hv: ",y,x)
-          Particles.append(self.Playfield[y][x])
 
         elif (SDColor == 4):
           r = af.SDDarkWhiteR 
@@ -13286,7 +13352,6 @@ class ParticleWorld(object):
                                     #(h,v,r,g,b,alive,lives,name):
           self.Playfield[y][x] = Particle(x,y,r,g,b,1,1,1,1,1,1,'WallBreakable',0,0,10)
           #print ("Copying wallbreakable to playfield hv: ",y,x)
-          Particles.append(self.Playfield[y][x])
 
         elif (SDColor >=5):
           r,g,b =  af.ColorList[SDColor]
@@ -13295,6 +13360,9 @@ class ParticleWorld(object):
           #(h,v,r,g,b,direction,scandirection,mass,speed,alive,lives,name,score,exploding,radarrange):
           self.Playfield[y][x] = Particle(x,y,r,g,b,1,1,1,1,1,1,'Particle',0,0,10)
           Particles.append(self.Playfield[y][x])
+          #self.Playfield[y][x].direction = af.PointTowardsObject8Way(x,y,height/2,width/2)
+          self.Playfield[y][x].direction = 1
+
         else:
           #print ("EmptyObject")
           self.Playfield[y][x] = af.EmptyObject('EmptyObject')
@@ -13393,6 +13461,21 @@ class ParticleWorld(object):
 
 
 
+def calculate_single_body_acceleration(Particle):
+    G_const  = 6.67408e-11 #m3 kg-1 s-2
+    GravityH = 7
+    GravityV = 32
+    acceleration = point(0,0)
+    
+    r = (Particle.h - GravityH)**2 + (Particle.v - GravityV)**2  
+    r = math.sqrt(r)
+    tmp = G_const * external_body.mass / r**3
+    acceleration.x += tmp * (GravityH - Particle.h)
+    acceleration.y += tmp * (GravityV - Particle.v)
+    
+
+    return acceleration
+
 
     
 
@@ -13401,7 +13484,7 @@ def ParticleWorldScanAround(Particle,Playfield):
   # hv represent particle location
   # ScanH and ScanV is where we are scanning
   
-  #print ("== Scan in Front of Particle ==")
+  print ("== Scan in Front of Particle ==")
   
   ScanDirection = Particle.direction
   ScanH         = 0
@@ -13431,7 +13514,9 @@ def ParticleWorldScanAround(Particle,Playfield):
   #Scan right diagonal
   ScanDirection = af.TurnRight8Way(Particle.direction)
   ScanH, ScanV = af.CalculateDotMovement8Way(h,v,ScanDirection)
+  print ("Scan right diaganol:",ScanH,ScanV)
   ItemList.append(Playfield[ScanV][ScanH].name)
+  
   
   #Scan behind
   ScanDirection = af.ReverseDirection8Way(Particle.direction)
@@ -13453,10 +13538,13 @@ def ParticleWorldScanAround(Particle,Playfield):
   return ItemList;
   
 
+
+
+
   
 
 def MoveParticle(Particle,Playfield):
-  #print ("== MoveParticle : ",Particle.name," hv dh dv alive--",Particle.h,Particle.v,Particle.dh,Particle.dv,Particle.alive)
+  print ("== MoveParticle : ",Particle.name," hv dh dv alive--",Particle.h,Particle.v,Particle.alive)
   
   #print ("")
   h = Particle.h
@@ -13467,23 +13555,17 @@ def MoveParticle(Particle,Playfield):
   ScanV = 0
   ItemList = []
   DoNothing = ""
-  ScanDirection = 1
-  WallInFront    = af.EmptyObject("EmptyObject")
+  ScanDirection     = 1
+  WallInFront       = af.EmptyObject("EmptyObject")
   ParticleInFront   = af.EmptyObject("EmptyObject")
   ParticleInRear    = af.EmptyObject("EmptyObject")
   ParticleLeftDiag  = af.EmptyObject("EmptyObject")
   ParticleRightDiag = af.EmptyObject("EmptyObject")
   
-  #Infection / mutation modiefers
-  #We need a random chance of mutation
-  #  possibilities: 
-  #  - mutate into another color
-  #  - vastly increase/decrease speed
-  #  - change direction
-  #  - happens right before last move 
   
-  InfectionSpeedModifier = -1
- 
+
+  Particle.velocity = Particle.speed * Particle.mass
+
 
   #print("Current Particle vh direction:",v,h,Particle.direction)
   ItemList = ParticleWorldScanAround(Particle,Playfield)
@@ -13538,116 +13620,43 @@ def MoveParticle(Particle,Playfield):
       Playfield[WallInFront.v][WallInFront.h] = af.EmptyObject("EmptyObject")
 
 
-  #print ("Thing in front:",ParticleInFront.name, WallInFront.name)
-        
-  #Check front Particle
-  if (ParticleInFront.name != "EmptyObject"):
-    if (ParticleInFront.name != Particle.name):
-      SpreadInfection(Particle,ParticleInFront,Particle.direction)
-      #ParticleInFront.AdjustSpeed(InfectionSpeedModifier)
-
-  #Check left diagonal Particle
-  if (ParticleLeftDiag.name != "EmptyObject"):
-    if (ParticleLeftDiag.name != Particle.name):
-      SpreadInfection(Particle,ParticleLeftDiag,(af.TurnLeft8Way(Particle.direction)))
-
-
-  #Check right diagonal Particle
-  if (ParticleRightDiag.name != "EmptyObject"):
-    if (ParticleRightDiag.name != Particle.name):
-      SpreadInfection(Particle,ParticleRightDiag,(af.TurnRight8Way(Particle.direction)))
-
-
-  #Check rear Particle
-  if (ParticleInRear.name != "EmptyObject"):
-    #If different Particle, take it over 
-    #make it follow
-    if (ParticleInRear.name != Particle.name):
-      SpreadInfection(Particle,ParticleInRear,Particle.direction)
-
-
-  #We follow other Particle of the same name
-  if (ParticleInFront.name == Particle.name):
-    Particle.direction = ParticleInFront.direction
-  elif (ParticleLeftDiag.name == Particle.name):
-    Particle.direction = ParticleLeftDiag.direction
-  elif (ParticleRightDiag.name == Particle.name):
-    Particle.direction = ParticleRightDiag.direction
-  elif (ParticleInRear.name == Particle.name):
-    Particle.direction = ParticleInRear.direction
-
-
-  #If no Particles around, increase speed and wander around
-  if (all("EmptyObject" == Item for Item in ItemList)):
-    Particle.AdjustSpeed(-1)
   
-
-  #print ("Particles: ",Particle.name, ParticleInFront.name, ParticleLeftDiag.name, ParticleRightDiag.name, ParticleInRear.name)
 
   
   #If no Particles around, check for walls
-  if (all("EmptyObject" == name for name in (ParticleInFront.name, ParticleLeftDiag.name, ParticleRightDiag.name, ParticleInRear.name))):
-    
+  #if (all("EmptyObject" == name for name in (ParticleInFront.name, ParticleLeftDiag.name, ParticleRightDiag.name, ParticleInRear.name))):
+   
 
-    if (ItemList[1] == "WallBreakable"):
-      Particle.direction = af.TurnLeftOrRight8Way(Particle.direction)
+  
 
-    elif((ItemList[1] == "Wall" or ItemList[1] == "WallBreakable") 
-      and ItemList[2] == "EmptyObject" 
-      and ItemList[3] == "EmptyObject"):
-      Particle.direction = af.TurnLeftOrRight8Way(Particle.direction)
+  
 
-    elif((ItemList[1] == "Wall" or ItemList[1] == "WallBreakable") 
-      and(ItemList[2] == "Wall" or ItemList[2] == "WallBreakable") 
-      and ItemList[3] == "EmptyObject"):
-      Particle.direction = af.TurnRight8Way(Particle.direction)
-
-    elif((ItemList[1] == "Wall" or ItemList[1] == "WallBreakable")
-      and ItemList[2] == "EmptyObject" 
-      and(ItemList[3] == "Wall" or ItemList[3] == "WallBreakable")):
-      Particle.direction = af.TurnLeft8Way(Particle.direction)
-
-    elif((ItemList[1] == "Wall" or ItemList[1] == "WallBreakable")
-     and (ItemList[2] == "Wall" or ItemList[2] == "WallBreakable")
-     and (ItemList[3] == "Wall" or ItemList[3] == "WallBreakable")):
-      Particle.direction = af.TurnLeftOrRightTwice8Way(af.ReverseDirection8Way(Particle.direction))
+  #temporary override
+  Particle.h += Particle.delta_h
+  Particle.v += Particle.delta_v
+  
+  if (Particle.v < 1 or Particle.v > 14):
+    Particle.delta_v = Particle.delta_v *(-1)
  
+  if (Particle.h < 1 or Particle.h > 14):
+    Particle.delta_h = Particle.delta_h *(-1)
+  
+  Particle.h += Particle.delta_h
+  Particle.v += Particle.delta_v
+  
 
-  #-----------------------------------------
-  #-- Mutations                           --
-  #-----------------------------------------
+  if (Particle.v < 0):
+    Particle.v = 0
+  if (Particle.v > 15):
+    Particle.v = 15
 
-  #Mutate Particle
-  #print ("MV - mutationrate type factor",Particle.mutationrate, Particle.mutationtype, Particle.mutationfactor)
-  if (random.randint(0,Particle.mutationrate) == 1):
-    Particle.Mutate()
-    if (Particle.alive == 0):
-      print ("Particle died!")
-      Particle.lives = 0
-      Particle.speed = 1
-      Particle.mutationtype   = 0
-      Particle.mutationfactor = 0
-      Playfield[Particle.v][Particle.h] = af.EmptyObject("EmptyObject")
+  if (Particle.h < 0):
+    Particle.h = 0
+  if (Particle.h > 15):
+    Particle.h = 15
 
 
 
-  if(Particle.mutationtype > 0):
-    # 1-4 is direction based
-    if (Particle.mutationtype in(1,2)):
-      for x in range(1,Particle.mutationfactor):
-        #print ("VM - mutation turning left")
-        Particle.direction = af.TurnLeft8Way(Particle.direction)
-    elif (Particle.mutationtype in(3,4)):
-      for x in range(1,Particle.mutationfactor):
-        #print ("VM - mutation turning right")
-        Particle.direction = af.TurnRight8Way(Particle.direction)
-    if (Particle.mutationtype == 5):
-      #print ("VM - mutation setting speed up",Particle.mutationfactor)
-      Particle.AdjustSpeed(Particle.mutationfactor)
-    if (Particle.mutationtype == 6):
-      #print ("VM - mutation setting slow",Particle.mutationfactor)
-      Particle.AdjustSpeed(Particle.mutationfactor)
-    
 
   if (Particle.alive == 1):  
     
@@ -13672,57 +13681,93 @@ def MoveParticle(Particle,Playfield):
         Particle.AdjustSpeed(random.randint(-5,3))
   else:
     print ("Particle died during mutation.  No movement possible.")
+
+
+
+  
+  
   return 
 
 
 
 def CreateParticleWorld(MapLevel):
-  
-  
-  print ("CreateDinnerPlate Map: ",MapLevel)
-
-
+  print ("Create Orbits Map: ",MapLevel)
   #def __init__(self, name, width, height, Map, Playfield, CameraH, CameraV, Gravity = 1):
 
 
   if (MapLevel == 1):
     Orbits = ParticleWorld(name='SolarSystem',
-                           width        = 18,
-                           height       = 18,
+                           width        = 16,
+                           height       = 16,
+                           Map          = [[]],
+                           Playfield    = [[]],
+                           CameraH      = 0,
+                           CameraV      = 0,
+                           DisplayH     = 0,
+                           DisplayV     = 0,
+                           Gravity      = 1)
+
+                                                        
+    #                                         |  |
+    Orbits.Map[0]  = ([  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
+    Orbits.Map[1]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1])
+    Orbits.Map[2]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1])
+    Orbits.Map[3]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1])
+    Orbits.Map[4]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1])
+    Orbits.Map[5]  = ([  1, 0, 0, 0, 0, 0, 0, 0,22, 0, 0, 0, 0, 0, 0, 1])
+    Orbits.Map[6]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1])
+    Orbits.Map[7]  = ([  1, 0, 0, 0, 0, 0, 0,11, 0, 0, 0, 0, 0, 0, 0, 1])
+    Orbits.Map[8]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1])
+    Orbits.Map[9]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1])
+    Orbits.Map[10] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1])
+    Orbits.Map[11] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1])
+    Orbits.Map[12] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1])
+    Orbits.Map[13] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1])
+    Orbits.Map[14] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1])
+    Orbits.Map[15] = ([  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
+
+
+
+  if (MapLevel == 2):
+    Orbits = ParticleWorld(name='SolarSystem',
+                           width        = 25,
+                           height       = 25,
                            Map          = [[]],
                            Playfield    = [[]],
                            CameraH      = 1,
                            CameraV      = 1,
+                           DisplayH     = 4,
+                           DisplayV     = 4,
                            Gravity      = 1)
+    #                                     |                    |  |                    |
+    Orbits.Map[0]  = ([  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ])
+    Orbits.Map[1]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    Orbits.Map[2]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    Orbits.Map[3]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    Orbits.Map[4]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    Orbits.Map[5]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])#
+    Orbits.Map[6]  = ([  1, 0, 0, 0, 0, 0, 0,19, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    Orbits.Map[7]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    Orbits.Map[8]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    Orbits.Map[9]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    Orbits.Map[10] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    Orbits.Map[11] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    Orbits.Map[12] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    Orbits.Map[13] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,13, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    Orbits.Map[14] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    Orbits.Map[15] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    Orbits.Map[16] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    Orbits.Map[17] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1 ])
+    Orbits.Map[18] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    Orbits.Map[19] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ]) #
+    Orbits.Map[20] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    Orbits.Map[21] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    Orbits.Map[22] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    Orbits.Map[23] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    Orbits.Map[24] = ([  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ])
 
-                                                         
-    #                                              |  |
-    TheWorld.Map[0]  = ([  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ])
-    TheWorld.Map[1]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
-    TheWorld.Map[2]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
-    TheWorld.Map[3]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
-    TheWorld.Map[4]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
-    TheWorld.Map[5]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
-    TheWorld.Map[6]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
-    TheWorld.Map[7]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
-    TheWorld.Map[8]  = ([  1, 0, 0, 0, 0, 0, 0, 0,23, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])  
-    TheWorld.Map[9]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])  
-    TheWorld.Map[10] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
-    TheWorld.Map[11] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
-    TheWorld.Map[12] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
-    TheWorld.Map[13] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
-    TheWorld.Map[14] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
-    TheWorld.Map[15] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
-    TheWorld.Map[16] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
-    TheWorld.Map[17] = ([  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ])
 
-
-
-
-
-
-
-
+    
 
 
   if (MapLevel == 98):
@@ -13737,60 +13782,29 @@ def CreateParticleWorld(MapLevel):
 
                                                          
     #                                                 |  |
-    TheWorld.Map[0]  = ([  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ])
-    TheWorld.Map[1]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
-    TheWorld.Map[2]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
-    TheWorld.Map[3]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
-    TheWorld.Map[4]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
-    TheWorld.Map[5]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
-    TheWorld.Map[6]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
-    TheWorld.Map[7]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
-    TheWorld.Map[8]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
-    TheWorld.Map[9]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
-    TheWorld.Map[10] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
-    TheWorld.Map[11] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
-    TheWorld.Map[12] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
-    TheWorld.Map[13] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
-    TheWorld.Map[14] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
-    TheWorld.Map[15] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
-    TheWorld.Map[16] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
-    TheWorld.Map[17] = ([  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ])
-
+    Orbits.Map[0]  = ([  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ])
+    Orbits.Map[1]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    Orbits.Map[2]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    Orbits.Map[3]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    Orbits.Map[4]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    Orbits.Map[5]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    Orbits.Map[6]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    Orbits.Map[7]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    Orbits.Map[8]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    Orbits.Map[9]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    Orbits.Map[10] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    Orbits.Map[11] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    Orbits.Map[12] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    Orbits.Map[13] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    Orbits.Map[14] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    Orbits.Map[15] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    Orbits.Map[16] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    Orbits.Map[17] = ([  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ])
 
   return Orbits;
 
 
 
-def FlashAllParticles(Particles,ParticleCount,Orbits,CameraH,CameraV):
-  x = 0
-  r = 0
-  g = 0
-  b = 0
-  highcolor = 0
-  count = 0
-  increment = 50
-  H = 0
-  V = 0
-  name = ""
-
-  for x in range (0,ParticleCount):
-    highcolor = max(Particles[x].r, Particles[x].g, Particles[x].b)
-    while (Particles[x].r < 255  and Particles[x].g < 255 and Particles[x].b < 255):
-      if (Particles[x].r == highcolor):
-        Particles[x].r = min(255,Particles[x].r + increment)
-      elif (Particles[x].g == highcolor):
-        Particles[x].g = min(255,Particles[x].g + increment)
-      elif (Particles[x].b == highcolor):
-        Particles[x].b = min(255,Particles[x].b + increment)
-
-      highcolor = highcolor + increment
-
-      #setpixel(Particles[x].h,Particles[x].v,Particles[x].r,Particles[x].g,Particles[x].b)
-      #unicorn.show()
-      #time.sleep(0.01)
-      
-    DinnerPlate.DisplayWindow(CameraH,CameraV)
-    #unicorn.show()
 
 
 
@@ -13799,7 +13813,7 @@ def FlashAllParticles(Particles,ParticleCount,Orbits,CameraH,CameraV):
 def PlayOrbits():      
 
 
-
+  
   finished     = 'N'
   moves        = 0
   LevelCount   = 1
@@ -13808,13 +13822,13 @@ def PlayOrbits():
   Particles      = []
   ParticleCount   = 0
   Particle        = af.EmptyObject("EmptyObject")
-  ParticleMaxCount     = 125 #if Particle count reaches 75%, end level
-  ParticleDeleted      = 0
+  ParticleMaxCount  = 125 #if Particle count reaches 75%, end level
+  ParticleDeleted   = 0
   DominanceCount    = 0
   DominanceMaxCount = 200 #how many ticks with there being only one Particle
   ClockSprite       = af.CreateClockSprite(12)
   ClockSprite.on    = 0
-
+  MaxParticleMoves  = 100000
   
   
 
@@ -13840,12 +13854,12 @@ def PlayOrbits():
   #LevelCount = random.randint(1,MaxLevel)
   LevelCount     = 1
   Orbits         = CreateParticleWorld(LevelCount)
-  Particles      = DinnerPlate.CopyMapToPlayfield()
+  Particles      = Orbits.CopyMapToPlayfield()
   ParticleCount  = len(Particles)
   print("ParticleCount: ",ParticleCount)
   DominanceCount = 0
-  CameraH        = DinnerPlate.DisplayH
-  CameraV        = DinnerPlate.DisplayV
+  CameraH        = Orbits.DisplayH
+  CameraV        = Orbits.DisplayV
 
   print ("CameraHV: ",CameraH, CameraV)
 
@@ -13893,19 +13907,10 @@ def PlayOrbits():
     x = 0
     while (x < ParticleCount):
       ParticleDeleted = 0
-      #Particles freakout when near the end of max moves
-      if (moves >= MaxParticleMoves-50):
-        Particles[x].Mutate()
 
       #print ("Looping x ParticleCount: ",x,ParticleCount)
-      #-------------------------
-      #-- Check for dominance --  
-      #-------------------------
 
-      #If all Particles are the same, display the mutation
-      #FlashDot(Particles[x].h-1,Particles[x].v-1,0.01)
-      #print ("ParticleName[x] speed: ",x,Particles[x].name, Particles[x].speed)
-      #print ("ParticleCount x:",ParticleCount,x )
+      #af.FlashDot(Particles[x].h,Particles[x].v,0.01)
       if (Particles[x].name != firstname):
         NameCount = NameCount + 1
 
@@ -13916,9 +13921,9 @@ def PlayOrbits():
       #print ("Speed:",Particles[x].speed)
       m,r = divmod(moves,Particles[x].speed)
       if (r == 0):
-        #print ("Particle name alive x:",Particles[x].name,Particles[x].alive,x)
+        print ("Particle name alive x:",Particles[x].name,Particles[x].alive,x)
         if (Particles[x].alive == 1):
-          MoveParticle(Particles[x],DinnerPlate.Playfield)
+          MoveParticle(Particles[x],Orbits.Playfield)
         else:
           print ("*** Removing Particle from the list: ",x)
           del Particles[x]
@@ -13927,20 +13932,6 @@ def PlayOrbits():
           ParticleDeleted = 1
           
   
-      #if Particle not deleted, replicate
-      if (ParticleDeleted == 0):
-        #----------------------
-        #-- Replication      --  
-        #----------------------
-        
-        #check Particle internal replication rate, or if only one type of Particle left check
-        #the main rate as an override
-        if ((random.randint(0,Particles[x].replicationrate) == 1) or (ParticleCount == 1 and (random.randint(0,replicationrate) == 1))):
-          Particle = ReplicateParticle(Particles[x],DinnerPlate)
-          if (Particle.name != "EmptyObject"):
-            #print("Particle replicated")
-            Particles.append(Particle)
-            ParticleCount = len(Particles)
 
 
       #---------------------------
@@ -13953,77 +13944,49 @@ def PlayOrbits():
       
       
 
-
-## NOT NEEDED IN HD MODE
-    # #----------------------------
-    # #-- Scroll Display Window  --  
-    # #----------------------------
-    # m,r = divmod(moves,CameraSpeed)
-    # if (r == 0):
-      # PathPosition = PathPosition + 1
-      # if (PathPosition == PathCount):
-        # PathPosition = 0
-      # CameraH, CameraV, CameraSpeed =  CameraPath[PathPosition]
-     
-      # #print ("PathPosition CameraH CameraV:",PathPosition,CameraH,CameraV)
-      
-      # ParticlesInWindow = DinnerPlate.CountParticlesInWindow(CameraH, CameraV)
-      # #print ("ParticlesInWindow: ",ParticlesInWindow)
-      # if ( ParticlesInWindow == 0):
-        # print ("No Particles in the window, scrolling past")
-        # CameraSpeed = ScrollSpeedShort
-   
-
-
-
-    #-------------------------------------------
-    #-- Level ends when one Particle dominates   --
-    #-------------------------------------------
+    # #-------------------------------------------
+    # #-- Level ends when one Particle dominates--
+    # #-------------------------------------------
   
-    if (NameCount == 1):
-      #Erase clock if present
-      #DinnerPlate.DisplayWindow(CameraH, CameraV)
-      DominanceCount = DominanceCount + 1
-      #print ("NameCount:",NameCount,"DominanceCount:",DominanceCount,"DominanceMaxCount:",DominanceMaxCount)
+    # if (NameCount == 1):
+      # #Erase clock if present
+      # #Orbits.DisplayWindow(CameraH, CameraV)
+      # DominanceCount = DominanceCount + 1
+      # #print ("NameCount:",NameCount,"DominanceCount:",DominanceCount,"DominanceMaxCount:",DominanceMaxCount)
       
-      #one Particle remains, increase chance of spreading
-      replicationrate   = 1
-      mutationdeathrate = 5000
+      
 
-
-      #print ("DominanceCount:",DominanceCount,"DominanceMaxCount:",DominanceMaxCount,"ParticleCount:",ParticleCount,"ParticleMaxCount:",ParticleMaxCount)
-      #if one Particle dominates for X ticks, reset and load next level
-      if (DominanceCount >= DominanceMaxCount) or(ParticleCount >= ParticleMaxCount):
-        print ("ParticleCount:",ParticleCount)
-        #print ("Flashdot hv: ",Particles[0].h,Particles[0].v)
-        #FlashDot (Particles[0].h - CameraH,Particles[0].v + CameraV,0.5)
-        time.sleep(1)
-        #unicorn.off()
-        FlashAllParticles(Particles,ParticleCount,DinnerPlate,CameraH,CameraV)
-        af.ShowScrollingBanner2("Strain # " + firstname + " secured" ,(af.MedGreen),gv.ScrollSleep)
+      # #print ("DominanceCount:",DominanceCount,"DominanceMaxCount:",DominanceMaxCount,"ParticleCount:",ParticleCount,"ParticleMaxCount:",ParticleMaxCount)
+      # #if one Particle dominates for X ticks, reset and load next level
+      # if (DominanceCount >= DominanceMaxCount) or(ParticleCount >= ParticleMaxCount):
+        # print ("ParticleCount:",ParticleCount)
+        # #print ("Flashdot hv: ",Particles[0].h,Particles[0].v)
+        # #FlashDot (Particles[0].h - CameraH,Particles[0].v + CameraV,0.5)
+        # time.sleep(1)
+        # #unicorn.off()
+        # FlashAllParticles(Particles,ParticleCount,Orbits,CameraH,CameraV)
+        # #af.ShowScrollingBanner2("Strain # " + str(firstname) + " secured" ,(af.MedGreen),gv.ScrollSleep)
         
-        #Prepare new level
-        DominanceCount  = 0
-        LevelCount      = random.randint(1,MaxLevel)
-        #mutationrate    = OriginalMutationRate
-        replicationrate   = OriginalReplicationRate
-        mutationdeathrate = OriginalMutationDeathRate
-        DinnerPlate       = CreateDinnerPlate(LevelCount)
-        CameraH           = DinnerPlate.DisplayH
-        CameraV           = DinnerPlate.DisplayV
-        Particles         = DinnerPlate.CopyMapToPlayfield()
-        ParticleCount     = len(Particles)
-        ClockSprite       = af.CreateClockSprite(12)
-        ClockSprite.on    = 0
+        # #Prepare new level
+        # DominanceCount  = 0
+        # LevelCount      = random.randint(1,MaxLevel)
+        # Orbits          = CreateParticleWorld(LevelCount)
+        # CameraH         = Orbits.DisplayH
+        # CameraV         = Orbits.DisplayV
+        # Particles       = Orbits.CopyMapToPlayfield()
+        # ParticleCount   = len(Particles)
+        # ClockSprite     = af.CreateClockSprite(12)
+        # ClockSprite.on  = 0
       
-        nextname = ""
-    else:
-      DominanceCount = 0
+        # nextname = ""
+    # else:
+      # DominanceCount = 0
         
     
     #------------------
     #-- Main Display --
     #------------------
+    print ("Moves:",moves,"                              ",end="\r")      
 
     # If it is time to show the clock, turn it on and show it
     # increment clock location if it is time to do so
@@ -14035,10 +13998,10 @@ def PlayOrbits():
     #print ("Camera HV:",CameraH, CameraV)
     if (ClockSprite.on == 1):
       #print ("Clock on")
-      DinnerPlate.DisplayWindowWithSprite(CameraH, CameraV, ClockSprite)
+      Orbits.DisplayWindowWithSprite(CameraH, CameraV, ClockSprite)
       MoveMessageSprite(moves,ClockSprite)
     else:
-      DinnerPlate.DisplayWindow(CameraH, CameraV)
+      Orbits.DisplayWindow(CameraH, CameraV)
     
     
     
@@ -14061,12 +14024,14 @@ def PlayOrbits():
       finished = "Y"
 
 
+    
+
   #let the display show the final results before clearing
   time.sleep(3)
   unicorn.off()
   
-  af.ShowScrollingBanner2("Infection Cured!",(af.MedYellow),gv.ScrollSleep *0.8)
-  af.ShowScrollingBanner2("Score: " + str(moves) ,(af.MedGreen),gv.ScrollSleep *0.8)
+  #af.ShowScrollingBanner2("Infection Cured!",(af.MedYellow),gv.ScrollSleep *0.8)
+  #af.ShowScrollingBanner2("Score: " + str(moves) ,(af.MedGreen),gv.ScrollSleep *0.8)
   unicorn.off()
   return
 
@@ -14249,7 +14214,7 @@ print("-----------------")
 
 
 print(TheRandomMessage)
-af.ShowScrollingBanner(TheRandomMessage,af.SDLowYellowR,af.SDLowYellowG,af.SDLowYellowB,gv.ScrollSleep )
+#af.ShowScrollingBanner(TheRandomMessage,af.SDLowYellowR,af.SDLowYellowG,af.SDLowYellowB,gv.ScrollSleep )
 #ShowLongIntro(gv.ScrollSleep)
 
 
@@ -14275,10 +14240,14 @@ while (1==1):
 
   try:
 
+
+    #PlayOrbits()
+
+
     ActivateClockMode(10)    
-    PlayPacDot(NumDots)
-    ActivateClockMode(60)    
     PlayOutbreak()
+    ActivateClockMode(60)    
+    PlayPacDot(NumDots)
     ActivateClockMode(60)    
     PlayDotInvaders()
     ActivateClockMode(60)    

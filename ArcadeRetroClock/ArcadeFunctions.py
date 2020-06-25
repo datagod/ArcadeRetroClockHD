@@ -1053,7 +1053,7 @@ class VirusWorld(object):
     else:
       IndentFactor = 0
 
-    print("gv.HatWidth",gv.HatWidth," NewWidth",NewWidth," ZoomFactor:",ZoomFactor,"HV_modifier",HV_modifier, "IndentFactor:",IndentFactor)
+    #print("gv.HatWidth",gv.HatWidth," NewWidth",NewWidth," ZoomFactor:",ZoomFactor,"HV_modifier",HV_modifier, "IndentFactor:",IndentFactor)
 
     for V in range(0,gv.HatWidth):
       for H in range (0,gv.HatHeight):

@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-
-
 #------------------------------------------------------------------------------
 #                                                                            --
 #      _    ____   ____    _    ____  _____    ____ _     ___   ____ _  __   --
@@ -26,19 +24,19 @@
 #
 #
 #------------------------------------------------------------------------------
-#   Version: 0.1                                                       
-#   Date:    June 12, 2020                                                
-#   Reason:  Major cleanup. getting ready for release
+#   Version: 0.1                                                             --
+#   Date:    June 12, 2020                                                   --
+#   Reason:  Major cleanup. getting ready for release                        --
 #------------------------------------------------------------------------------
-#   Version: 1.0                                                       
-#   Date:    June 18, 2020                                                
-#   Reason:  General release
+#   Version: 1.0                                                             --
+#   Date:    June 18, 2020                                                   --
+#   Reason:  General release                                                 --
 #------------------------------------------------------------------------------
 #   Version: 1.01                                                            --
 #   Date:    June 24, 2020                                                   --
 #   Changes:                                                                 --
-#    - Outbreak maps now zoom in at start and zoom out at end                --
-#    - tinkered with orbits to get particles bouncing, will remain inactive  --
+#    - outbreak uses new zoom function at start and stop of levels           --
+#    - tinkered with Orbits getting particles to bounce, remains inactive    --
 #------------------------------------------------------------------------------
 
 
@@ -12892,7 +12890,7 @@ def PlayOutbreak():
 
   print ("CameraHV: ",CameraH, CameraV)
 
-  #af.ShowScrollingBanner("Outbreak!",af.SDLowYellowR,af.SDLowYellowG,af.SDLowYellowB,gv.ScrollSleep *0.8)
+  af.ShowScrollingBanner("Outbreak!",af.SDLowYellowR,af.SDLowYellowG,af.SDLowYellowB,gv.ScrollSleep *0.8)
   DinnerPlate.DisplayWindowZoom(CameraH,CameraV,1,16,0.025)
   
 
@@ -14214,7 +14212,7 @@ print("-----------------")
 
 
 print(TheRandomMessage)
-#af.ShowScrollingBanner(TheRandomMessage,af.SDLowYellowR,af.SDLowYellowG,af.SDLowYellowB,gv.ScrollSleep )
+af.ShowScrollingBanner(TheRandomMessage,af.SDLowYellowR,af.SDLowYellowG,af.SDLowYellowB,gv.ScrollSleep )
 #ShowLongIntro(gv.ScrollSleep)
 
 

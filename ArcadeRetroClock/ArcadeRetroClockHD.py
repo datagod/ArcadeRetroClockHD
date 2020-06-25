@@ -8199,7 +8199,7 @@ def ActivateClockMode(ClockOnDuration):
       DOW.CopySpriteToBuffer(DOW.h,6)
       ShowRandomAnimation()
     else:  
-      #Display the DOW
+      #Display the DOW (day of week)
       DOW.CopySpriteToBuffer(DOW.h,6)
 
     unicorn.show()

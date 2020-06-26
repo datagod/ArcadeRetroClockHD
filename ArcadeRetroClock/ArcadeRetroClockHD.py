@@ -77,6 +77,8 @@
 # make SuperWorms head of the snake slightly diferent color
 
 
+
+
 #------------------------------------------------------------------------------
 # Initialization Section                                                     --
 #------------------------------------------------------------------------------
@@ -125,6 +127,7 @@ import inspect
 
 
 random.seed()
+start_time = time.time()
 
 #python debugger
 import pdb
@@ -248,7 +251,6 @@ PacDotHighScore   = 0
 MaxMoves = 2000
 
 #Timers
-start_time = time.time()
 
 
 
@@ -1784,6 +1786,7 @@ def DrawDotMatrix(DotMatrix):
       if (gv.DotMatrix[h][v] == 1):
         NumDots = NumDots + 1
         af.setpixel(h,v,af.DotR,af.DotG,af.DotB)
+
   #print ("Dots Found: ",NumDots)
   unicorn.show()        
   #SendBufferPacket(RemoteDisplay,gv.HatHeight,gv.HatWidth)
@@ -1858,6 +1861,7 @@ def DrawDots( NumDots ):
     Tries = Tries + 1
     if gv.DotMatrix[h][v] != 1:
       gv.DotMatrix[h][v] = 1
+      af.FlashDot5(h,v,0.001)
       af.setpixel(h,v,af.DotR,af.DotG,af.DotB)  
       DotCount = DotCount + 1
     h = randint(0,gv.HatWidth-1)
@@ -4299,7 +4303,7 @@ def CreateSpecialArmada(ShowTime=True):
     if ((random.randint(1,2) == 1) or ShowTime == True):
       TheTime = af.CreateClockSprite(12)
     else:
-      WordList=("PAC","MAN","1943","USA","CAN","AUS","NZ","UK","???","XX","RAS","PIE","PI",
+      WordList=("PAC","MAN","1943","USA","CAN","AUS","NZ","UK","XX","RAS","PIE","PI",
                 "IOI",":O:","8:8","123","777","42","888")
       TheMessage = WordList[random.randint(1,len(WordList)-1)]
       TheTime = af.CreateBannerSprite(TheMessage)
@@ -5274,8 +5278,8 @@ def PlayDotInvaders():
         PlayerShipExplosion.Animate(PlayerShip.h-2,PlayerShip.v-2,'forward',0.025)
 
       #Display animation and clock every X seconds
-      #if (CheckElapsedTime(CheckTime) == 1):
-      #  ScrollScreenShowClock('up',gv.ScrollSleep)         
+      if (CheckElapsedTime(CheckTime) == 1):
+        ScrollScreenShowClock('up',gv.ScrollSleep)         
 
 
 
@@ -7504,7 +7508,7 @@ def PlayDotZerk():
         moves=0
         
 
-      CheckTime = 30
+      CheckTime = 60
       #Display animation and clock every X seconds
       if (CheckElapsedTime(CheckTime) == 1):
         ScrollScreenShowDotZerkRobotTime('down',gv.ScrollSleep)         
@@ -8097,6 +8101,29 @@ def ScrollScreenShowPacTime(direction,speed):
       
       
 
+
+def ShowScrollingClock():
+  TheTime = af.CreateClockSprite(12)
+  
+  
+  #PacRightAnimatedSprite.Scroll(-5,1,'right',13,gv.ScrollSleep)
+  #OrangeGhostSprite.ScrollAcrossScreen(0,1,"right",gv.ScrollSleep)
+
+  ThreeGhostPacSprite.ScrollAcrossScreen(0,5,"right",gv.ScrollSleep)
+  TheTime.ScrollAcrossScreen(0,5,"right",gv.ScrollSleep)
+
+  #PacSprite.HorizontalFlip()
+  #BlueGhostSprite.ScrollAcrossScreen(0,1,"left",gv.ScrollSleep)
+  ThreeBlueGhostPacSprite.ScrollAcrossScreen(0,5,"left",gv.ScrollSleep)
+  
+  #PacLeftAnimatedSprite.Scroll(8,1,'left',13,gv.ScrollSleep)
+
+  TheTime.ScrollAcrossScreen(0,5,"left",gv.ScrollSleep)
+  #PacSprite.HorizontalFlip()
+  
+
+
+
 def ScrollScreenShowLittleShipTime(speed):
   
   ScreenCapBefore = copy.deepcopy(unicorn.get_pixels())
@@ -8132,8 +8159,8 @@ def ScrollScreenShowClock(direction,speed):
   af.ScrollScreen('up',ScreenCap,0.01)
   #ScrollScreen('right',ScreenCap,0.01)
 
-  TheTime.ScrollAcrossScreen(0,1,"right",speed)
-  af.ScrollScreen('left',ScreenCap,0.01)
+  TheTime.ScrollAcrossScreen(0,5,"right",speed)
+  af.ScrollScreen('down',ScreenCap,0.01)
 
 
 
@@ -8159,7 +8186,12 @@ def ActivateClockMode(ClockOnDuration):
   
   Oldmm = 0
   done  = 0
-  
+  ShownOnce = 0
+
+
+  print ("ACM - Started1")
+
+
   #Display Day of Week
   while ((CheckTimer(StartClockTime, ClockOnDuration) != 1) and (done == 0)):
     
@@ -8191,18 +8223,34 @@ def ActivateClockMode(ClockOnDuration):
       #Display New Time
       TheTime.CopySpriteToBuffer(TheTime.h,TheTime.v)
       
-    
+
+
+    print("sleeping1")
+    time.sleep(0.5)    
 
     if (CheckTimer(DisplayTime,5) == 1):
       #Reset timer 
       DisplayTime = time.time()
       DOW.CopySpriteToBuffer(DOW.h,6)
       ShowRandomAnimation()
+      print("sleeping2")
+      time.sleep(0.5)    
+
     else:  
       #Display the DOW (day of week)
       DOW.CopySpriteToBuffer(DOW.h,6)
 
-    unicorn.show()
+    print("sleeping3")
+    time.sleep(0.5)    
+
+    #Zoom in to the time, but only once
+    if (ShownOnce == 0):
+      print ("ShownOnce:",ShownOnce)
+      ScreenCap  = copy.deepcopy(unicorn.get_pixels())
+      unicorn.clear()
+      af.ZoomScreen(ScreenCap,2,17,0.025)
+      ShownOnce = 1
+
     #SendBufferPacket(RemoteDisplay,gv.HatHeight,gv.HatWidth)
 
 
@@ -8213,8 +8261,16 @@ def ActivateClockMode(ClockOnDuration):
       done = 1
       print ("Trying to quit!")
     
+    
+    unicorn.show()
     print (datetime.now())
     time.sleep(1)
+
+
+  #Zoom Clock at end
+  ScreenCap  = copy.deepcopy(unicorn.get_pixels())
+  af.ZoomScreen(ScreenCap,16,2,0.025)
+
 
   
   
@@ -8545,10 +8601,14 @@ def CheckElapsedTime(seconds):
   elapsed_time = time.time() - start_time
   elapsed_hours, rem = divmod(elapsed_time, 3600)
   elapsed_minutes, elapsed_seconds = divmod(rem, 60)
-  #print("Elapsed Time: {:0>2}:{:0>2}:{:05.2f}".format(int(elapsed_hours),int(elapsed_minutes),elapsed_seconds),end="\r")
 
-  if (elapsed_seconds >= seconds ):
-    start_time = time.time()
+
+  m,r = divmod(round(elapsed_seconds), seconds)
+  #print("Elapsed Time: {:0>2}:{:0>2}:{:05.2f}".format(int(elapsed_hours),int(elapsed_minutes),elapsed_seconds)," CheckSeconds:",seconds," remainder:",r,end="\r")
+
+  #if (elapsed_seconds >= seconds ):
+    #start_time = time.time()
+  if (r == 0):
     return 1
   else:
     return 0
@@ -10792,6 +10852,12 @@ def TurnAwayFromDot4Way(SourceH,SourceV,SourceDirection,TargetH,TargetV):
 
 
 
+def ScrollThreeGhostSprite(direction):
+  ThreeGhostSprite = JoinSprite(RedGhostSprite, OrangeGhostSprite, 2)
+  ThreeGhostSprite = JoinSprite(ThreeGhostSprite, PurpleGhostSprite, 2)
+  ThreeGhostSprite.ScrollAcrossScreen(0,1,direction,gv.ScrollSleep)
+
+
 
 
 
@@ -10879,9 +10945,9 @@ def PlayPacDot(NumDots):
   PowerPillActive  = 0
   PowerPillMoves   = 0
   BlueGhostmoves   = 500
-  StartGhostSpeed1 = 7
-  StartGhostSpeed2 = 8
-  StartGhostSpeed3 = 9
+  StartGhostSpeed1 = 5
+  StartGhostSpeed2 = 6
+  StartGhostSpeed3 = 7
   StartGhostSpeed4 = 10
   GhostSpeed1      = StartGhostSpeed1
   GhostSpeed2      = StartGhostSpeed2
@@ -10910,6 +10976,7 @@ def PlayPacDot(NumDots):
 
   #Timers
   start_time = time.time()
+  
 
 
 
@@ -10920,6 +10987,7 @@ def PlayPacDot(NumDots):
   print ("P-A-C-D-O-T")
   print ("")
   
+  af.ShowScrollingBanner2("pacdot",(af.MedYellow),gv.ScrollSleep)
 
 
   while 1 == 1:   
@@ -10927,8 +10995,6 @@ def PlayPacDot(NumDots):
     # ThreeGhostPacSprite.HorizontalFlip()
     # ThreeGhostPacSprite.ScrollAcrossScreen(0,3,"left",gv.ScrollSleep)
     # ThreeGhostPacSprite.HorizontalFlip()
-
-    af.ShowScrollingBanner2("pacdot",(af.MedYellow),gv.ScrollSleep)
 
     # ThreeBlueGhostPacSprite.HorizontalFlip()
     # ThreeBlueGhostPacSprite.ScrollAcrossScreen(0,7,"right",gv.ScrollSleep)
@@ -10945,7 +11011,7 @@ def PlayPacDot(NumDots):
     
     unicorn.off()
    
-    #ShowLevelCount(LevelCount)
+    af.ShowLevelCount(LevelCount)
 
     
     #Reset Variables
@@ -11099,7 +11165,9 @@ def PlayPacDot(NumDots):
           Ghost1H, Ghost1V, CurrentDirection1 = MoveGhost(Ghost1H, Ghost1V,CurrentDirection1,af.Ghost1R,af.Ghost1G,af.Ghost1B)
           #CurrentDirection1 = af.ChanceOfTurning(CurrentDirection1,50)
           Ghost1H,Ghost1V = DrawGhost(Ghost1H,Ghost1V,af.Ghost1R,af.Ghost1G,af.Ghost1B)
-          
+
+
+
 
       if Ghost2Alive == 1:
         m,r = divmod(moves,GhostSpeed2)
@@ -11205,13 +11273,28 @@ def PlayPacDot(NumDots):
       else:
         PacStuckCount = 0
 
+      
       if (CheckElapsedTime(CheckTime) == 1):
-        ScrollScreenShowClock('UP',gv.ScrollSleep)
-        PacLeftAnimatedSprite.Scroll(8,1,'left',13,gv.ScrollSleep)
+        if(random.randint(1,2) == 1):
+          ScrollScreenShowClock('up',gv.ScrollSleep)         
+        else:
+          ScreenCap  = copy.deepcopy(unicorn.get_pixels())
+          unicorn.clear()
+          af.ZoomScreen(ScreenCap,16,2,0.025)
+          unicorn.clear()
+          if (random.randint(1,2) == 1):
+            PacLeftAnimatedSprite.Scroll(16,5,'left',22,gv.ScrollSleep)
+            TheTime = af.CreateClockSprite(12)
+            TheTime.ScrollAcrossScreen(16,5,'left',gv.ScrollSleep)
+          else:
+            ShowScrollingClock()
+          af.ZoomScreen(ScreenCap,2,16,0.025)
+          af.setpixels(ScreenCap)
+
 
       #Count dots.  Sometimes the ghosts sit on a dot and it loses its color
-      if (CheckElapsedTime(5) == 1):
-        DotsRemaining = CountDotsRemaining(gv.DotMatrix)
+      #if (CheckElapsedTime(5) == 1):
+      #  DotsRemaining = CountDotsRemaining(gv.DotMatrix)
 
         
       unicorn.show()  
@@ -12645,6 +12728,41 @@ def CreateDinnerPlate(MapLevel):
 
 
 
+  if (MapLevel == 26):
+    DinnerPlate = af.VirusWorld(name='Jacobs',
+                               width        = 16,
+                               height       = 16,
+                               Map          = [[]],
+                               Playfield    = [[]],
+                               CurrentRoomH = 1,
+                               CurrentRoomV = 1,
+                               DisplayH     = 0,
+                               DisplayV     = 0,
+                               mutationrate = mutationrate,
+                               replicationrate   = replicationrate,
+                               mutationdeathrate = mutationdeathrate,
+                               VirusStartSpeed   = gv.VirusStartSpeed)
+
+    DinnerPlate.Map[0]  = ([  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ])
+    DinnerPlate.Map[1]  = ([  1,33, 0, 0, 0, 0, 0, 0,33, 0, 0, 0, 0, 0,33, 1 ])
+    DinnerPlate.Map[2]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    DinnerPlate.Map[3]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    DinnerPlate.Map[4]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    DinnerPlate.Map[5]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    DinnerPlate.Map[6]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    DinnerPlate.Map[7]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    DinnerPlate.Map[8]  = ([  1, 0, 0, 0, 0, 0, 0, 0,33, 0, 0, 0, 0, 0, 0, 1 ])
+    DinnerPlate.Map[9]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    DinnerPlate.Map[10] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    DinnerPlate.Map[11] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    DinnerPlate.Map[12] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    DinnerPlate.Map[13] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    DinnerPlate.Map[14] = ([  1,33, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,33, 1 ])
+    DinnerPlate.Map[15] = ([  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ])
+
+  return DinnerPlate;
+
+
 
 
   if (MapLevel == 98):
@@ -12794,7 +12912,7 @@ def PlayOutbreak():
   finished     = 'N'
   gv.VirusMoves     = 0
   LevelCount   = 1
-  MaxLevel     = 25
+  MaxLevel     = 26
   NameCount    = 0
   Viruses      = []
   VirusCount   = 0
@@ -12877,7 +12995,8 @@ def PlayOutbreak():
   #----------------------
   #-- Prepare Level    --
   #----------------------
-  LevelCount = random.randint(1,MaxLevel)
+  #LevelCount = random.randint(1,MaxLevel)
+  LevelCount = 26
   
   
   DinnerPlate = CreateDinnerPlate(LevelCount)
@@ -12891,7 +13010,9 @@ def PlayOutbreak():
   print ("CameraHV: ",CameraH, CameraV)
 
   af.ShowScrollingBanner("Outbreak!",af.SDLowYellowR,af.SDLowYellowG,af.SDLowYellowB,gv.ScrollSleep *0.8)
-  DinnerPlate.DisplayWindowZoom(CameraH,CameraV,1,16,0.025)
+  DinnerPlate.DisplayWindowZoom(CameraH,CameraV,2,16,0.025)
+  
+  
   
 
 
@@ -13043,7 +13164,7 @@ def PlayOutbreak():
         time.sleep(1)
         #unicorn.off()
         FlashAllViruses(Viruses,VirusCount,DinnerPlate,CameraH,CameraV)
-        DinnerPlate.DisplayWindowZoom(CameraH,CameraV,16,1,0.025)
+        DinnerPlate.DisplayWindowZoom(CameraH,CameraV,16,2,0.025)
 
         af.ShowScrollingBanner2("Strain # " + firstname + " secured" ,(af.MedGreen),gv.ScrollSleep)
         
@@ -13059,7 +13180,7 @@ def PlayOutbreak():
         VirusCount        = len(Viruses)
         ClockSprite       = af.CreateClockSprite(12)
         ClockSprite.on    = 0
-        DinnerPlate.DisplayWindowZoom(CameraH,CameraV,1,16,0.025)
+        DinnerPlate.DisplayWindowZoom(CameraH,CameraV,2,16,0.025)
       
         nextname = ""
     else:
@@ -13110,7 +13231,7 @@ def PlayOutbreak():
   #let the display show the final results before clearing
   time.sleep(3)
   unicorn.off()
-  DinnerPlate.DisplayWindowZoom(CameraH,CameraV,16,1,0.025)
+  DinnerPlate.DisplayWindowZoom(CameraH,CameraV,16,2,0.025)
   af.ShowScrollingBanner2("Infection Cured!",(af.MedYellow),gv.ScrollSleep *0.8)
   af.ShowScrollingBanner2("Score: " + str(gv.VirusMoves) ,(af.MedGreen),gv.ScrollSleep *0.8)
   unicorn.off()
@@ -14243,22 +14364,33 @@ while (1==1):
 
 
     ActivateClockMode(10)    
+
     PlayOutbreak()
     ActivateClockMode(60)    
+
     PlayPacDot(NumDots)
     ActivateClockMode(60)    
+ 
+
     PlayDotInvaders()
     ActivateClockMode(60)    
+    
     PlaySpaceDot()
     ActivateClockMode(60)    
+
     PlaySuperWorms()
     ActivateClockMode(60)    
+
     PlayRallyDot()
     ActivateClockMode(60)    
+
     PlayDotZerk()
     ActivateClockMode(60)    
+
     PlayWormDot()
     ActivateClockMode(60)    
+
+
       
   except Exception as ErrorMessage:
     TraceMessage = traceback.format_exc()

@@ -1006,35 +1006,37 @@ class VirusWorld(object):
 
 
 
-  def DisplayWindow(self,h,v):
-    #This function accepts h,v coordinates for the entire map (e.g. 1,8  20,20,  64,64)    
-    #Displays what is on the playfield currently, including walls, cars, etc.
-    r = 0
-    g = 0
-    b = 0
-    count = 0
+  # def DisplayWindow(self,h,v):
+    # #This function accepts h,v coordinates for the entire map (e.g. 1,8  20,20,  64,64)    
+    # #Displays what is on the playfield currently, including walls, cars, etc.
+    # r = 0
+    # g = 0
+    # b = 0
+    # count = 0
         
 
-    for V in range(0,gv.HatWidth):
-      for H in range (0,gv.HatHeight):
-        #print ("DisplayWindow hv HV: ",h,v,H,V) 
-        name = self.Playfield[v+V][h+H].name
-        #print ("Display: ",name,V,H)
-        if (name == "EmptyObject"):
-          r = 0
-          g = 0
-          b = 0          
+    # for V in range(0,gv.HatWidth):
+      # for H in range (0,gv.HatHeight):
+        # #print ("DisplayWindow hv HV: ",h,v,H,V) 
+        # name = self.Playfield[v+V][h+H].name
+        # #print ("Display: ",name,V,H)
+        # if (name == "EmptyObject"):
+          # r = 0
+          # g = 0
+          # b = 0          
 
-        else:
-          r = self.Playfield[v+V][h+H].r
-          g = self.Playfield[v+V][h+H].g
-          b = self.Playfield[v+V][h+H].b
+        # else:
+          # r = self.Playfield[v+V][h+H].r
+          # g = self.Playfield[v+V][h+H].g
+          # b = self.Playfield[v+V][h+H].b
           
-        #Our map is an array of arrays [v][h] but we draw h,v
-        setpixel(H,V,r,g,b)
+        # #Our map is an array of arrays [v][h] but we draw h,v
+        # setpixel(H,V,r,g,b)
     
-    unicorn.show()
-    #SendBufferPacket(RemoteDisplay,gv.HatHeight,gv.HatWidth)
+    # unicorn.show()
+    # #SendBufferPacket(RemoteDisplay,gv.HatHeight,gv.HatWidth)
+
+
 
   def DisplayWindow(self,h,v,ZoomFactor=0):
     #This function accepts h,v coordinates for the entire map (e.g. 1,8  20,20,  64,64)    
@@ -4315,7 +4317,7 @@ def SetTimeHHMM():
    0,1,1,
    0,0,0,
    0,1,0]
-)
+  )
 
               
               
@@ -5374,25 +5376,6 @@ def CreateShortWordSprite(ShortWord):
 
 
   
-def ShowScrollingClock():
-  TheTime = CreateClockSprite(12)
-  
-  
-  #PacRightAnimatedSprite.Scroll(-5,1,'right',13,gv.ScrollSleep)
-  #OrangeGhostSprite.ScrollAcrossScreen(0,1,"right",gv.ScrollSleep)
-
-  ThreeGhostPacSprite.ScrollAcrossScreen(0,1,"right",gv.ScrollSleep)
-  TheTime.ScrollAcrossScreen(0,1,"right",gv.ScrollSleep)
-
-  #PacSprite.HorizontalFlip()
-  #BlueGhostSprite.ScrollAcrossScreen(0,1,"left",gv.ScrollSleep)
-  ThreeBlueGhostPacSprite.ScrollAcrossScreen(0,1,"left",gv.ScrollSleep)
-  
-  #PacLeftAnimatedSprite.Scroll(8,1,'left',13,gv.ScrollSleep)
-
-  TheTime.ScrollAcrossScreen(0,1,"left",gv.ScrollSleep)
-  #PacSprite.HorizontalFlip()
-  
 
   
  
@@ -5409,7 +5392,7 @@ def CreateBannerSprite(TheMessage):
     x = ord(c) -65
     if (c == '?'):
       BannerSprite = JoinSprite(BannerSprite, QuestionMarkSprite,0)
-    if (c == '-'):
+    elif (c == '-'):
       BannerSprite = JoinSprite(BannerSprite, DashSprite,0)
     elif (c == '#'):
       BannerSprite = JoinSprite(BannerSprite, PoundSignSprite,0)
@@ -5575,10 +5558,8 @@ def ScreenWipe(Wipe, Speed):
         time.sleep(Speed)
     
 #Primitive, single color
-def ScrollThreeGhostSprite(direction):
-  ThreeGhostSprite = JoinSprite(RedGhostSprite, OrangeGhostSprite, 2)
-  ThreeGhostSprite = JoinSprite(ThreeGhostSprite, PurpleGhostSprite, 2)
-  ThreeGhostSprite.ScrollAcrossScreen(0,1,direction,gv.ScrollSleep)
+
+
 
   
 
@@ -6305,6 +6286,87 @@ def ScrollScreen(direction,ScreenCap,speed):
 
       
       
+
+
+
+
+def ZoomScreen(ScreenCap, ZoomStart,ZoomStop,ZoomSleep):    
+  #Screen capture is a copy of the unicorn display Buffer, which in HD is a numpy array
+  #Capture the screen, then pass that to this function
+  #this function will make a copy, chop up that copy and display the slices in the order to make
+  #it look like the screen is scrolling up or down, left or right
+  
+  #For now, we scroll, replacing with empty screen.  Also, reverse.
+ 
+  ZoomFActor = 0
+  
+
+  if (ZoomStart <= ZoomStop):
+    for ZoomFactor in range (ZoomStart,ZoomStop):
+      DisplayScreenCap(ScreenCap,ZoomFactor,ZoomIn = 0)
+      time.sleep(ZoomSleep)
+        
+  else:
+    for ZoomFactor in reversed(range(ZoomStop, ZoomStart)):
+      #clear the screen as we zoom to remove leftovers
+      unicorn.clear()        
+      DisplayScreenCap(ScreenCap,ZoomFactor, ZoomIn = 1)
+      time.sleep(ZoomSleep)
+
+
+
+
+  # for y in range (gv.HatWidth):
+    # for x in range (gv.HatWidth):
+      # r,g,b = ScreenCap[abs(15-x)][y]
+      # setpixel(x,y,r,g,b)
+
+
+
+
+
+def DisplayScreenCap(ScreenCap,ZoomFactor=0,ZoomIn=1):
+  #This function writes a Screen capture to the buffer using the specified zoom factor
+  r = 0
+  g = 0
+  b = 0
+  count    = 0
+
+  IndentFactor = 0    
+  HV_modifier = (1 / gv.HatHeight ) * ZoomFactor
+  NewWidth = round(gv.HatHeight * HV_modifier)
+
+
+  if (ZoomFactor > 1):
+    IndentFactor = (gv.HatWidth / 2) - (NewWidth /2)
+  else:
+    IndentFactor = 0
+
+  #print("gv.HatWidth",gv.HatWidth," NewWidth",NewWidth," ZoomFactor:",ZoomFactor,"HV_modifier",HV_modifier, "IndentFactor:",IndentFactor)
+
+  for V in range(0,gv.HatWidth):
+    for H in range (0,gv.HatHeight):
+      r,g,b = ScreenCap[abs(15-H)][V]
+      if (ZoomFactor > 0):
+        #If we are zooming in, we don't want to draw the black squares because they make
+        #the zoom look skimpy.  We want a nice fat zoom, like your momma's butt.      
+        if(ZoomIn == 1):
+          if (r !=0 or g!=0 or b!=0):
+            setpixel((H * HV_modifier) + IndentFactor ,(V * HV_modifier) + IndentFactor,r,g,b)
+        else:
+          setpixel((H * HV_modifier) + IndentFactor ,(V * HV_modifier) + IndentFactor,r,g,b)
+
+        
+      else:
+        setpixel(H,V,r,g,b)
+  
+  unicorn.show()
+
+
+
+
+
+
 
 
 

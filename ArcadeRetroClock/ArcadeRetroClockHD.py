@@ -12744,23 +12744,59 @@ def CreateDinnerPlate(MapLevel):
                                VirusStartSpeed   = gv.VirusStartSpeed)
 
     DinnerPlate.Map[0]  = ([  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ])
-    DinnerPlate.Map[1]  = ([  1,33, 0, 0, 0, 0, 0, 0,33, 0, 0, 0, 0, 0,33, 1 ])
+    DinnerPlate.Map[1]  = ([  1,32, 0, 0, 0, 0, 0, 0,33, 0, 0, 0, 0, 0,20, 1 ])
+    DinnerPlate.Map[2]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    DinnerPlate.Map[3]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    DinnerPlate.Map[4]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    DinnerPlate.Map[5]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    DinnerPlate.Map[6]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    DinnerPlate.Map[7]  = ([  1, 0, 0, 0, 0, 0, 4, 4, 4, 4, 0, 0, 0, 0, 0, 1 ])
+    DinnerPlate.Map[8]  = ([  1, 0, 0, 0, 0, 0, 4,38,38, 4, 0, 0, 0, 0, 0, 1 ])
+    DinnerPlate.Map[9]  = ([  1, 0, 0, 0, 0, 0, 4,38,38, 4, 0, 0, 0, 0, 0, 1 ])
+    DinnerPlate.Map[10] = ([  1, 0, 0, 0, 0, 0, 4, 4, 4, 4, 0, 0, 0, 0, 0, 1 ])
+    DinnerPlate.Map[11] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    DinnerPlate.Map[12] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    DinnerPlate.Map[13] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    DinnerPlate.Map[14] = ([  1,32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,20, 1 ])
+    DinnerPlate.Map[15] = ([  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ])
+
+  
+
+
+
+  if (MapLevel == 27):
+    DinnerPlate = af.VirusWorld(name='Jacobs',
+                               width        = 16,
+                               height       = 16,
+                               Map          = [[]],
+                               Playfield    = [[]],
+                               CurrentRoomH = 1,
+                               CurrentRoomV = 1,
+                               DisplayH     = 0,
+                               DisplayV     = 0,
+                               mutationrate = mutationrate,
+                               replicationrate   = replicationrate,
+                               mutationdeathrate = mutationdeathrate,
+                               VirusStartSpeed   = gv.VirusStartSpeed)
+
+    DinnerPlate.Map[0]  = ([  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ])
+    DinnerPlate.Map[1]  = ([  1, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,11, 1 ])
     DinnerPlate.Map[2]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
     DinnerPlate.Map[3]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
     DinnerPlate.Map[4]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
     DinnerPlate.Map[5]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
     DinnerPlate.Map[6]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
     DinnerPlate.Map[7]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
-    DinnerPlate.Map[8]  = ([  1, 0, 0, 0, 0, 0, 0, 0,33, 0, 0, 0, 0, 0, 0, 1 ])
-    DinnerPlate.Map[9]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
-    DinnerPlate.Map[10] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
-    DinnerPlate.Map[11] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
-    DinnerPlate.Map[12] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
-    DinnerPlate.Map[13] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
-    DinnerPlate.Map[14] = ([  1,33, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,33, 1 ])
+    DinnerPlate.Map[8]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    DinnerPlate.Map[9]  = ([  1, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    DinnerPlate.Map[10] = ([  1, 4,20,20,20, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    DinnerPlate.Map[11] = ([  1, 4,20, 8,20, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    DinnerPlate.Map[12] = ([  1, 4,20, 8,20, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    DinnerPlate.Map[13] = ([  1, 4,20,20,20, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    DinnerPlate.Map[14] = ([  1, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0,10, 1 ])
     DinnerPlate.Map[15] = ([  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ])
 
-  return DinnerPlate;
+  
 
 
 
@@ -12912,7 +12948,7 @@ def PlayOutbreak():
   finished     = 'N'
   gv.VirusMoves     = 0
   LevelCount   = 1
-  MaxLevel     = 26
+  MaxLevel     = 27
   NameCount    = 0
   Viruses      = []
   VirusCount   = 0
@@ -12996,7 +13032,7 @@ def PlayOutbreak():
   #-- Prepare Level    --
   #----------------------
   #LevelCount = random.randint(1,MaxLevel)
-  LevelCount = 26
+  LevelCount = 27
   
   
   DinnerPlate = CreateDinnerPlate(LevelCount)

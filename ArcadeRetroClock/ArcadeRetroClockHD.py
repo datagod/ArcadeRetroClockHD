@@ -3901,7 +3901,6 @@ def PlaySpaceDot():
 
     #Draw bottom background
     color = random.randint(1,7) * 4 + 1
-    print ("Clock SDColor: ",color)
     r,g,b = af.ColorList[color]    
     
     for i in range (0,gv.HatWidth):
@@ -3917,7 +3916,6 @@ def PlaySpaceDot():
 
       if (r == 0):
         color = random.randint(1,7) * 4 + 1
-        print ("Clock SDColor: ",color)
         r,g,b = af.ColorList[color]    
 
         for i in range (0,gv.HatWidth):
@@ -4295,7 +4293,6 @@ def CreateSpecialArmada(ShowTime=True):
 
     
     color = random.randint(1,7) * 4 + 3
-    print ("Clock SDColor: ",color)
     r,g,b = af.ColorList[color]
     
     
@@ -8225,7 +8222,7 @@ def ActivateClockMode(ClockOnDuration):
       
 
 
-    print("sleeping1")
+    
     time.sleep(0.5)    
 
     if (CheckTimer(DisplayTime,5) == 1):
@@ -8233,14 +8230,12 @@ def ActivateClockMode(ClockOnDuration):
       DisplayTime = time.time()
       DOW.CopySpriteToBuffer(DOW.h,6)
       ShowRandomAnimation()
-      print("sleeping2")
       time.sleep(0.5)    
 
     else:  
       #Display the DOW (day of week)
       DOW.CopySpriteToBuffer(DOW.h,6)
 
-    print("sleeping3")
     time.sleep(0.5)    
 
     #Zoom in to the time, but only once
@@ -11405,6 +11400,7 @@ def PlayPacDot(NumDots):
 def SpreadInfection(Virus1,Virus2,direction):
   global ClumpingSpeed
   global ChanceOfSpeedup
+  global InfectionChance
 
   #print ("Spread Infection: ",Virus1.name, Virus2.name)
   
@@ -11413,29 +11409,42 @@ def SpreadInfection(Virus1,Virus2,direction):
     #print ("Wallbreakable is immune from infections but does sustain damage",Virus2.lives)
     Virus2.lives = Virus2.lives -1
     if (Virus2.lives <= 0):
+      Virus2 = af.EmptyObject
       Virus2.alive = 0
-      Virus2.lives = 0
 
   else:
-    Virus2.name = Virus1.name
-    Virus2.r    = Virus1.r   
-    Virus2.g    = Virus1.g   
-    Virus2.b    = Virus1.b   
-    Virus2.direction      = direction
-    Virus2.speed          = Virus1.speed
-    Virus2.mutationtype   = Virus1.mutationtype
-    Virus2.mutationrate   = Virus1.mutationrate
-    Virus2.mutationfactor = Virus1.mutationfactor
+
+    if(random.randint(1,gv.InfectionChance) == 1):
+
+      Virus2.name = Virus1.name
+      Virus2.r    = Virus1.r   
+      Virus2.g    = Virus1.g   
+      Virus2.b    = Virus1.b   
+      Virus2.direction      = direction
+      Virus2.speed          = Virus1.speed
+      Virus2.mutationtype   = Virus1.mutationtype
+      Virus2.mutationrate   = Virus1.mutationrate
+      Virus2.mutationfactor = Virus1.mutationfactor
+      
+      #Too slow.  Need another way to indicate mass infections spreading
+      #if (af.CheckBoundary(Virus2.h,Virus2.v) == 0):
+      #  af.FlashDot6(Virus2.h,Virus2.v)
+      
+      #Infected virus slows down, attempt to increase clumping
+      Virus2.AdjustSpeed(+gv.ClumpingSpeed)
+      
     
-    #Too slow.  Need another way to indicate mass infections spreading
-    #if (af.CheckBoundary(Virus2.h,Virus2.v) == 0):
-    #  af.FlashDot6(Virus2.h,Virus2.v)
-    
-    #Infected virus slows down, attempt to increase clumping
-    Virus2.AdjustSpeed(+gv.ClumpingSpeed)
+      
 
   
 def ReplicateVirus(Virus,DinnerPlate):
+  #global MaxReplications
+
+  #         2 1 3
+  #         5 x 6                              
+  #           4   
+
+
   ItemList  = []
   ItemList  = af.VirusWorldScanAround(Virus,DinnerPlate.Playfield)
   h         = Virus.h
@@ -11444,34 +11453,47 @@ def ReplicateVirus(Virus,DinnerPlate):
   ScanH     = 0
   direction = Virus.direction
   scandirection = 0
-  VirusCopy = af.EmptyObject("EmptyObject")
+  VirusCopy     = copy.deepcopy(Virus)
+  VirusCopy.replications +=1
+  Virus.replications +=1
   
-
-  #print ("--Replication in progress--")
+  #print ("Replication in progress: generation(",VirusCopy.replications,")")
   
-  if (ItemList[5] == "EmptyObject" or
-      ItemList[6] == "EmptyObject"):
-  
-    if (ItemList[5] == "EmptyObject"):
-      #print ("Open space to the left")
-      scandirection  = af.TurnLeft8Way(af.TurnLeft8Way(direction))
-      #print ("direction scandirection",direction,scandirection)
+  if(VirusCopy.replications >= gv.MaxReplications):
+      VirusCopy.lives = 0
+      VirusCopy.alive = 0
+      VirusCopy       = af.EmptyObject("EmptyObject")
+      Virus.lives     = 0
+      Virus.alive     = 0
+      Virus           = af.EmptyObject("EmptyObject")
+      DinnerPlate.Playfield[h][v] = af.EmptyObject("EmptyObject")
 
-    elif (ItemList[6] == "EmptyObject"):
-      #print ("Open space to the right")
-      scandirection = af.TurnRight8Way(af.TurnRight8Way(direction))
+      #print("Virus replication limit met.  Virus died.")
 
-    ScanH,ScanV = af.CalculateDotMovement8Way(h,v,scandirection)
-    VirusCopy = copy.deepcopy(Virus)
-    VirusCopy.v = ScanV
-    VirusCopy.h = ScanH
-    VirusCopy.AdjustSpeed(gv.ReplicationSpeed)
-    DinnerPlate.Playfield[ScanV][ScanH] = VirusCopy
 
-  
-  #else:
-    #print ("No room at the inn.  Sorry folks!")
-    #print ("--Replication terminated--")
+  else:
+    
+    if (ItemList[5] == "EmptyObject" or ItemList[6] == "EmptyObject"):
+    
+      if (ItemList[5] == "EmptyObject"):
+        #print ("Open space to the left")
+        scandirection  = af.TurnLeft8Way(af.TurnLeft8Way(direction))
+        #print ("direction scandirection",direction,scandirection)
+
+      elif (ItemList[6] == "EmptyObject"):
+        #print ("Open space to the right")
+        scandirection = af.TurnRight8Way(af.TurnRight8Way(direction))
+
+      ScanH,ScanV = af.CalculateDotMovement8Way(h,v,scandirection)
+      VirusCopy.v = ScanV
+      VirusCopy.h = ScanH
+      VirusCopy.AdjustSpeed(gv.ReplicationSpeed)
+      DinnerPlate.Playfield[ScanV][ScanH] = VirusCopy
+
+    
+    #else:
+      #print ("No room at the inn.  Sorry folks!")
+      #print ("--Replication terminated--")
     
   return VirusCopy;
   
@@ -11548,7 +11570,7 @@ def MoveVirus(Virus,Playfield):
   
 
   #Infect Viruss
-  #If different virus, take it over
+  #If different virus, take it over (test for chance)
   #else follow it
 
 
@@ -11645,48 +11667,48 @@ def MoveVirus(Virus,Playfield):
   if (random.randint(0,Virus.mutationrate) == 1):
     Virus.Mutate()
     if (Virus.alive == 0):
-      print ("Virus died!")
+      print ("Accident during mutation. Virus died!")
       Virus.lives = 0
       Virus.speed = 1
       Virus.mutationtype   = 0
       Virus.mutationfactor = 0
       Playfield[Virus.v][Virus.h] = af.EmptyObject("EmptyObject")
+    else:
 
 
+      if(Virus.mutationtype > 0):
+        # 1-4 is direction based
+        if (Virus.mutationtype in(1,2)):
+          for x in range(1,Virus.mutationfactor):
+            #print ("VM - mutation turning left")
+            Virus.direction = af.TurnLeft8Way(Virus.direction)
+        elif (Virus.mutationtype in(3,4)):
+          for x in range(1,Virus.mutationfactor):
+            #print ("VM - mutation turning right")
+            Virus.direction = af.TurnRight8Way(Virus.direction)
+        elif (Virus.mutationtype == 5):
+          #print ("VM - mutation setting speed up",Virus.mutationfactor)
+          Virus.AdjustSpeed(Virus.mutationfactor)
+        elif (Virus.mutationtype == 6):
+          #print ("VM - mutation setting slow",Virus.mutationfactor)
+          Virus.AdjustSpeed(Virus.mutationfactor)
+        elif (Virus.mutationtype == 7):
+          if (random.randint(0,Virus.mutationfactor) == 1):
+            #print ("VM - wobbling",Virus.mutationfactor)
+            Virus.direction = af.TurnLeftOrRight8Way(Virus.direction)
+        
+        elif (Virus.mutationtype == 8):
+          m,r = divmod(gv.VirusMoves,Virus.mutationfactor)
+          if (r == 0):
+            #print ("VM - slowturning left",Virus.mutationfactor, " CurrentMove: ",gv.VirusMoves)
+            Virus.direction = af.TurnLeft8Way(Virus.direction)
 
-  if(Virus.mutationtype > 0):
-    # 1-4 is direction based
-    if (Virus.mutationtype in(1,2)):
-      for x in range(1,Virus.mutationfactor):
-        #print ("VM - mutation turning left")
-        Virus.direction = af.TurnLeft8Way(Virus.direction)
-    elif (Virus.mutationtype in(3,4)):
-      for x in range(1,Virus.mutationfactor):
-        #print ("VM - mutation turning right")
-        Virus.direction = af.TurnRight8Way(Virus.direction)
-    elif (Virus.mutationtype == 5):
-      #print ("VM - mutation setting speed up",Virus.mutationfactor)
-      Virus.AdjustSpeed(Virus.mutationfactor)
-    elif (Virus.mutationtype == 6):
-      #print ("VM - mutation setting slow",Virus.mutationfactor)
-      Virus.AdjustSpeed(Virus.mutationfactor)
-    elif (Virus.mutationtype == 7):
-      if (random.randint(0,Virus.mutationfactor) == 1):
-        #print ("VM - wobbling",Virus.mutationfactor)
-        Virus.direction = af.TurnLeftOrRight8Way(Virus.direction)
-    
-    elif (Virus.mutationtype == 8):
-      m,r = divmod(gv.VirusMoves,Virus.mutationfactor)
-      if (r == 0):
-        #print ("VM - slowturning left",Virus.mutationfactor, " CurrentMove: ",gv.VirusMoves)
-        Virus.direction = af.TurnLeft8Way(Virus.direction)
 
-
-    elif (Virus.mutationtype == 9):
-      m,r = divmod(gv.VirusMoves,Virus.mutationfactor)
-      if (r == 0):
-        #print ("VM - slowturning right",Virus.mutationfactor)
-        Virus.direction = af.TurnRight8Way(Virus.direction)
+        elif (Virus.mutationtype == 9):
+          m,r = divmod(gv.VirusMoves,Virus.mutationfactor)
+          if (r == 0):
+            #print ("VM - slowturning right",Virus.mutationfactor)
+            Virus.direction = af.TurnRight8Way(Virus.direction)
 
   if (Virus.alive == 1):  
     
@@ -11737,22 +11759,22 @@ def CreateDinnerPlate(MapLevel):
                                VirusStartSpeed = gv.VirusStartSpeed)
                                
     DinnerPlate.Map[0]  = ([  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ])
-    DinnerPlate.Map[1]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
-    DinnerPlate.Map[2]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1 ])
-    DinnerPlate.Map[3]  = ([  1, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 1 ])
-    DinnerPlate.Map[4]  = ([  1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 2, 0, 0, 0, 1, 0, 1 ])
-    DinnerPlate.Map[5]  = ([  1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 2, 0, 0, 0, 1, 0, 1 ])
-    DinnerPlate.Map[6]  = ([  1, 0, 1, 0, 1, 1, 1, 0, 0, 4, 1, 2, 0, 0, 1, 1, 0, 1 ])
-    DinnerPlate.Map[7]  = ([  1, 0, 1, 1, 1, 1, 1,12, 0, 4,11,11, 0, 0, 1, 1, 0, 1 ])
-    DinnerPlate.Map[8]  = ([  1, 0, 1, 1, 0, 0, 0,15, 0, 4,11,11, 0, 0, 1, 1, 0, 1 ])
-    DinnerPlate.Map[9]  = ([  1, 0, 1, 1, 0, 0, 0,15, 0, 4,11,11, 0, 0, 0, 1, 0, 1 ])
-    DinnerPlate.Map[10] = ([  1, 0, 1, 1,15,15, 0,15, 0, 4, 4, 4, 0, 0, 0, 1, 0, 1 ])
-    DinnerPlate.Map[11] = ([  1, 0, 0, 0, 4, 4, 0, 0, 0, 0, 0,17, 0, 0, 1, 1, 0, 1 ])
-    DinnerPlate.Map[12] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1 ])
-    DinnerPlate.Map[13] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,32, 0, 0, 1, 1, 0, 1 ])
-    DinnerPlate.Map[14] = ([  1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 4, 4, 1, 1, 0, 1 ])
-    DinnerPlate.Map[15] = ([  1, 0, 1, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1 ])
-    DinnerPlate.Map[16] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    DinnerPlate.Map[1]  = ([  1, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 1 ])
+    DinnerPlate.Map[2]  = ([  1, 0, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 1 ])
+    DinnerPlate.Map[3]  = ([  1, 0, 0, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 1 ])
+    DinnerPlate.Map[4]  = ([  1, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 4, 1 ])
+    DinnerPlate.Map[5]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 1 ])
+    DinnerPlate.Map[6]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 2, 0, 0, 0, 0, 0, 1 ])
+    DinnerPlate.Map[7]  = ([  1, 0, 0, 0, 0, 0, 0,12, 0, 4,11,11, 0, 0, 0, 0, 0, 1 ])
+    DinnerPlate.Map[8]  = ([  1, 0, 0, 0, 0, 0, 0,15, 0, 4,11,11, 0, 0, 0, 0, 0, 1 ])
+    DinnerPlate.Map[9]  = ([  1, 0, 0, 0, 0, 0, 0,15, 0, 4,11,11, 0, 0, 0, 0, 0, 1 ])
+    DinnerPlate.Map[10] = ([  1, 0, 0, 0,15,15, 0,15, 0, 4, 4, 4, 0, 0, 0, 0, 0, 1 ])
+    DinnerPlate.Map[11] = ([  1, 0, 0, 0, 4, 4, 0, 0, 0, 0, 0,17, 0, 0, 0, 0, 0, 1 ])
+    DinnerPlate.Map[12] = ([  1, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    DinnerPlate.Map[13] = ([  1, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0,32, 0, 0, 0, 0, 0, 1 ])
+    DinnerPlate.Map[14] = ([  1, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 0, 0, 0, 1 ])
+    DinnerPlate.Map[15] = ([  1, 4, 4, 4, 4, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    DinnerPlate.Map[16] = ([  1, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
     DinnerPlate.Map[17] = ([  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ])
  
  
@@ -13031,8 +13053,10 @@ def PlayOutbreak():
   #----------------------
   #-- Prepare Level    --
   #----------------------
-  #LevelCount = random.randint(1,MaxLevel)
-  LevelCount = 27
+  af.SaveConfigData()
+
+  LevelCount = random.randint(1,MaxLevel)
+  #LevelCount = 27
   
   
   DinnerPlate = CreateDinnerPlate(LevelCount)
@@ -13069,8 +13093,10 @@ def PlayOutbreak():
         LevelFinished = 'Y'
         Finished      = 'Y'
         return
+      elif (Key == 'm'):
+        DinnerPlate.DebugPlayfield()
 
-      print ("Moves:",gv.VirusMoves,"                              ",end="\r")      
+      print ("Moves:",gv.VirusMoves," VirusCount:",VirusCount,"                              ",end="\r")      
 
 
     
@@ -13094,7 +13120,6 @@ def PlayOutbreak():
       VirusDeleted = 0
       #Viruses freakout when near the end of max moves
       if (gv.VirusMoves == gv.FreakoutMoves):
-        Viruses[x].Mutate()
         Viruses[x].replicationrate = gv.FreakoutReplicationRate
 
       #print ("Looping x VirusCount: ",x,VirusCount)
@@ -13120,12 +13145,27 @@ def PlayOutbreak():
         if (Viruses[x].alive == 1):
           MoveVirus(Viruses[x],DinnerPlate.Playfield)
         else:
-          print ("*** Removing virus from the list: ",x)
+          #print ("Removing virus from the list: ",x)
           del Viruses[x]
           VirusCount = VirusCount -1
           #print ("VirusCount:",VirusCount)
           VirusDeleted = 1
           
+          
+
+      #----------------------
+      #-- Audit Playfield  --  
+      #----------------------
+      #There seems to be a bug where an old dead virus is still on the playfield.
+      #We will check periodically and remove them
+      if (random.randint(1,50) == 1):
+        for v in range(0,DinnerPlate.height):
+          for h in range(0,DinnerPlate.width):
+            if (DinnerPlate.Playfield[v][h].alive == 0 and DinnerPlate.Playfield[v][h].name != 'EmptyObject'):
+              print('Zombie detected:',v,h,DinnerPlate.Playfield[v][h].name)
+              DinnerPlate.DebugPlayfield()
+              DinnerPlate.Playfield[v][h] = af.EmptyObject("EmptyObject")
+
   
       #if virus not deleted, replicate
       if (VirusDeleted == 0):
@@ -13979,8 +14019,6 @@ def PlayOrbits():
   Particle        = af.EmptyObject("EmptyObject")
   ParticleMaxCount  = 125 #if Particle count reaches 75%, end level
   ParticleDeleted   = 0
-  DominanceCount    = 0
-  DominanceMaxCount = 200 #how many ticks with there being only one Particle
   ClockSprite       = af.CreateClockSprite(12)
   ClockSprite.on    = 0
   MaxParticleMoves  = 100000

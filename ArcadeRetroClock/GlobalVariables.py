@@ -43,11 +43,11 @@ VirusBottomSpeed  = 10
 MinBright         = 100
 MaxBright         = 255
 
-OriginalMutationRate      = 100
-OriginalReplicationRate   = 100
+OriginalMutationRate      = 500
+OriginalReplicationRate   = 200
 FreakoutReplicationRate   = 10   #new replication rate when a virus freaksout
-MaxVirusMoves             = 10000 #after this many moves the level is over
-FreakoutMoves             = 8000 #after this many moves, the viruses will replicate and mutate at a much greater rate
+MaxVirusMoves             = 100000 #after this many moves the level is over
+FreakoutMoves             = 58000 #after this many moves, the viruses will replicate and mutate at a much greater rate
 OriginalMutationDeathRate = 20
 mutationrate      = 0
 mutationdeathrate = 0
@@ -58,6 +58,9 @@ ChanceOfSpeedup   = 1     #determines how often a lone virus will spontaneously 
 SlowTurnMinMoves  = 5     #number of moves a mutated virus moves before turning
 SlowTurnMaxMoves  = 25    #number of moves a mutated virus moves before turning
 VirusStartSpeed   = 20    #staring speed of the viruses
+MaxReplications   = 5     #Maximum number of replications, if surpassed the virus dies
+MaxMutations      = 5     #Maximum number of mutations, if surpassed the virus dies
+InfectionChance   = 5     #Chance of one virus infecting another, lower the number greater the chance
 
 
 #----------------------------

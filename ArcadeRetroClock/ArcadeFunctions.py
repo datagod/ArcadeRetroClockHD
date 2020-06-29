@@ -944,12 +944,14 @@ class VirusWorld(object):
     #print ("width height: ",width,height)
     
     for y in range (0,height):
-      print (*self.Map[y])
+      #print (*self.Map[y])
   
       for x in range(0,width):
         #print ("RD xy color: ",x,y, self.Map[y][x])
         SDColor = self.Map[y][x]
   
+        print(str(SDColor).rjust(3,' '),end='')
+
         if (SDColor == 1):
           r = SDDarkWhiteR
           g = SDDarkWhiteG
@@ -1000,7 +1002,9 @@ class VirusWorld(object):
         else:
           #print ("EmptyObject")
           self.Playfield[y][x] = EmptyObject('EmptyObject')
+      print('')
 
+    self.DebugPlayfield()
     return Viruses;
 
 
@@ -1157,45 +1161,48 @@ class VirusWorld(object):
 
 
 
-            
-  def DisplayWindowWithSprite(self,h,v,ClockSprite):
-    #This function accepts h,v coordinates for the entire map (e.g. 1,8  20,20,  64,64)    
-    #Displays what is on the playfield currently, including walls, cars, etc.
-    r = 0
-    g = 0
-    b = 0
-    count = 0
-        
 
-    for V in range(0,gv.HatWidth):
-      for H in range (0,gv.HatHeight):
+
+  def DebugPlayfield(self):
+    #Show contents of playfield - in text window, for debugging purposes
+    
+    width   = self.width 
+    height  = self.height
+    print ("Map width height:",width,height)
+  
+    x = 0
+    y = 0
+    
+    for V in range(0,height):
+      for H in range (0,width):
          
-        name = self.Playfield[v+V][h+H].name
+        name = self.Playfield[V][H].name
         #print ("Display: ",name,V,H)
         if (name == "EmptyObject"):
-          r = 0
-          g = 0
-          b = 0          
+          print ('  ',end='')
 
-        else:
-          r = self.Playfield[v+V][h+H].r
-          g = self.Playfield[v+V][h+H].g
-          b = self.Playfield[v+V][h+H].b
-          
-        #Our map is an array of arrays [v][h] but we draw h,v
-        setpixel(H,V,r,g,b)
-
-    #Display clock at current location
-    #Clock hv will allow external functions to slide clock all over screen
-
-    #print ("Clock info  hv on: ",ClockSprite.h,ClockSprite.v,ClockSprite.on)
-    ClockSprite.CopySpriteToBuffer(ClockSprite.h,ClockSprite.v)
+        #draw border walls
+        elif (name == 'Wall' and (V == 0 or V == height-1)):
+          print(' _',end='')
         
-    unicorn.show()
-    #SendBufferPacket(RemoteDisplay,gv.HatHeight,gv.HatWidth)
+        #draw border walls
+        elif (name == 'Wall' and (H == 0 or H == width-1)):
+          print(' |',end='')
+          
+        #draw interior
+        elif (name == 'Wall'):
+          print (' #',end='')
 
+        #draw interior
+        elif (name == 'WallBreakable'):
+          print (' o',end='')
 
+        elif (self.Playfield[V][H].alive == 1):
+          print (' .',end='')
+        else:
+          print (' *',end='')
 
+      print('')
 
 
 
@@ -1227,6 +1234,10 @@ class Virus(object):
     self.replicationrate = replicationrate    
     self.mutationdeathrate = mutationdeathrate
     self.mutationtypes     = 9
+    self.replications      = 0
+    self.mutations         = 0
+    self.infectionchance   = gv.InfectionChance
+
 
   def Display(self):
     if (self.alive == 1):
@@ -1244,7 +1255,6 @@ class Virus(object):
 
   #Lower is faster!
   def AdjustSpeed(self, increment):
-    speed = self.speed
     speed = self.speed + increment
     if (speed > gv.VirusBottomSpeed):
       speed = gv.VirusBottomSpeed
@@ -1253,12 +1263,25 @@ class Virus(object):
 
     self.speed = speed
     #print("Adjust speed: ",speed, increment)
+    return;
 
+  #Lower is faster!
+  def AdjustInfectionChance(self, increment):
+    infectionchance = self.infectionchance + increment
 
+    if (infectionchance > gv.InfectionChance):
+      infectionchance = gv.InfectionChance
+    elif (infectionchance < 1):
+      infectionchance = 1
+
+    self.infectionchance = infectionchance
     return;
 
 
+
   def Mutate(self):
+    global MaxMutations
+
     x              = 0
     #number of possible mutations
     # direction
@@ -1271,12 +1294,13 @@ class Virus(object):
     # wobble
     # slow curves left
     # slow curves right
+    
 
     mutationrate   = self.mutationrate
     mutationtype   = self.mutationtype
     mutationfactor = self.mutationfactor
     speed          = self.speed
-    MinSpeed       = 1 #* gv.CPUModifier
+    MinSpeed       = 1  #* gv.CPUModifier
     MaxSpeed       = 10 #* gv.CPUModifier   #higher = slower!
     r              = 0
     g              = 0
@@ -1284,58 +1308,10 @@ class Virus(object):
     name           = 0
 
 
-    #print ("--Virus mutation!--")
-    mutationtype = random.randint(1,self.mutationtypes)
-
-    
-    #Mutations get a new name and color
-    x = random.randint(1,7)
-    if (x == 1):
-      #Big Red
-      r = random.randint(gv.MinBright,gv.MaxBright)
-      g = 0
-      b = 0
-      
-    if (x == 2):
-      #booger
-      r = 0
-      g = random.randint(gv.MinBright,gv.MaxBright)
-      b = 0
-
-    if (x == 3):
-      #BlueWhale
-      r = 0
-      g = 0
-      b = random.randint(gv.MinBright,gv.MaxBright)
-
-    if (x == 4):
-      #pinky
-      r = random.randint(gv.MinBright,gv.MaxBright)
-      g = 0
-      b = random.randint(gv.MinBright,gv.MaxBright)
-
-    if (x == 5):
-      #MellowYellow
-      r = random.randint(gv.MinBright,gv.MaxBright)
-      g = random.randint(gv.MinBright,gv.MaxBright)
-      b = 0
-
-    if (x == 6):
-      #undead
-      r = 0
-      g = random.randint(gv.MinBright,gv.MaxBright)
-      b = random.randint(gv.MinBright,gv.MaxBright)
-
-    if (x == 7):
-      #swamp mix
-      r = random.randint(gv.MinBright,gv.MaxBright)
-      g = random.randint(gv.MinBright,gv.MaxBright)
-      b = random.randint(gv.MinBright,gv.MaxBright)
-
-
-
     #Mutations can be deadly
-    if (random.randint(1,self.mutationdeathrate) == 1):
+    self.mutations += 1
+    if ((random.randint(1,self.mutationdeathrate) == 1)
+       or (self.mutations >= gv.MaxMutations)):
       self.alive = 0
       self.lives = 0
       self.speed = 999999
@@ -1343,82 +1319,143 @@ class Virus(object):
       self.r     = 0
       self.g     = 0
       self.b     = 0
-  
-    #Directional Behavior - turns left a little
-    if (mutationtype == 1):
-      mutationfactor       = random.randint(1,2)
-
-    #Directional Behavior - turns left a lot
-    elif (mutationtype == 2):
-      mutationfactor       = random.randint(2,3)
-
-    #Directional Behavior - turns right a little
-    elif (mutationtype == 3):
-      mutationfactor       = random.randint(1,2)
-
-    #Directional Behavior - turns right a lot
-    elif (mutationtype == 4):
-      mutationfactor       = random.randint(2,3)
-
-    #Speed up
-    elif (mutationtype == 5):
-      mutationfactor = 1
-      self.AdjustSpeed(mutationfactor * -1)
-      #print ("Mutation: speed up", self.speed, mutationfactor)
-      if (speed < 1):
-        speed = 1
-
-    #Speed down
-    elif (mutationtype == 6):
-      mutationfactor = 1
-      self.AdjustSpeed(mutationfactor)
-      #print ("Mutation: slow down", self.speed, mutationfactor)
-
-    #wobble
-    elif (mutationtype == 7):
-      mutationfactor = random.randint(1,10)
-      #print ("Mutation: wobble",mutationfactor)
-      #print ("Color override")
-      self.AdjustSpeed(mutationfactor)
-      r = 255
-      g = 255
-      b = 255
+    else:
 
 
-    #slow turn left
-    elif (mutationtype == 8):
-      mutationfactor = random.randint(gv.SlowTurnMinMoves,gv.SlowTurnMaxMoves)  #higher is slower!
-      #print ("Mutation: slow LEFT turn every (",mutationfactor,") moves")
-      #print ("Color override")
-      self.AdjustSpeed(mutationfactor)
-      r = 255
-      g = 255
-      b = 0
-
-
-    #slow turn right
-    elif (mutationtype == 9):
-      mutationfactor = random.randint(gv.SlowTurnMinMoves,gv.SlowTurnMaxMoves)  #higher is slower!
-      #print ("Mutation: slow righ turn every (",mutationfactor,") moves")
-      #print ("Color override")
-      self.AdjustSpeed(mutationfactor)
-      r = 255
-      g = 0
-      b = 255
-
-
+      #print ("--Virus mutation!--")
+      mutationtype = random.randint(1,self.mutationtypes)
 
       
-    #Update common properties
-    self.r              = r
-    self.g              = g
-    self.b              = b
-    self.name           = "" + str(self.r) + ' - ' + str(self.g)+ ' - ' + str(self.b)
-    self.mutationtype   = mutationtype
-    self.mutationfactor = mutationfactor
-    #print ("TheSpeed: ",self.speed)
-    
+      #Mutations get a new name and color
+      x = random.randint(1,7)
+      if (x == 1):
+        #Big Red
+        r = random.randint(gv.MinBright,gv.MaxBright)
+        g = 0
+        b = 0
+        
+      if (x == 2):
+        #booger
+        r = 0
+        g = random.randint(gv.MinBright,gv.MaxBright)
+        b = 0
 
+      if (x == 3):
+        #BlueWhale
+        r = 0
+        g = 0
+        b = random.randint(gv.MinBright,gv.MaxBright)
+
+      if (x == 4):
+        #pinky
+        r = random.randint(gv.MinBright,gv.MaxBright)
+        g = 0
+        b = random.randint(gv.MinBright,gv.MaxBright)
+
+      if (x == 5):
+        #MellowYellow
+        r = random.randint(gv.MinBright,gv.MaxBright)
+        g = random.randint(gv.MinBright,gv.MaxBright)
+        b = 0
+
+      if (x == 6):
+        #undead
+        r = 0
+        g = random.randint(gv.MinBright,gv.MaxBright)
+        b = random.randint(gv.MinBright,gv.MaxBright)
+
+      if (x == 7):
+        #swamp mix
+        r = random.randint(gv.MinBright,gv.MaxBright)
+        g = random.randint(gv.MinBright,gv.MaxBright)
+        b = random.randint(gv.MinBright,gv.MaxBright)
+
+
+    
+      #Directional Behavior - turns left a little
+      if (mutationtype == 1):
+        mutationfactor       = random.randint(1,2)
+        self.AdjustInfectionChance(mutationfactor * -1)
+
+      #Directional Behavior - turns left a lot
+      elif (mutationtype == 2):
+        mutationfactor       = random.randint(2,3)
+        self.AdjustInfectionChance(mutationfactor * -1)
+
+      #Directional Behavior - turns right a little
+      elif (mutationtype == 3):
+        mutationfactor    = random.randint(1,2)
+        self.AdjustInfectionChance(mutationfactor * -1)
+
+      #Directional Behavior - turns right a lot
+      elif (mutationtype == 4):
+        mutationfactor       = random.randint(2,3)
+        self.AdjustInfectionChance(mutationfactor * -1)
+
+      #Speed up and infect at a higher rate
+      elif (mutationtype == 5):
+        mutationfactor = 2
+        self.AdjustInfectionChance(mutationfactor * -1)
+        self.AdjustSpeed(mutationfactor * -1)
+        #print ("Mutation: speed up", self.speed, mutationfactor)
+        if (speed < 1):
+          speed = 1
+
+      #Speed down
+      elif (mutationtype == 6):
+        mutationfactor = 1
+        self.AdjustSpeed(mutationfactor)
+        self.AdjustInfectionChance(mutationfactor * -1)
+
+        #print ("Mutation: slow down", self.speed, mutationfactor)
+
+      #wobble
+      elif (mutationtype == 7):
+        mutationfactor = random.randint(1,10)
+        #print ("Mutation: wobble",mutationfactor)
+        #print ("Color override")
+        self.AdjustSpeed(mutationfactor)
+        self.AdjustInfectionChance(mutationfactor * -1)
+
+        r = 255
+        g = 255
+        b = 255
+
+
+      #slow turn left
+      elif (mutationtype == 8):
+        mutationfactor = random.randint(gv.SlowTurnMinMoves,gv.SlowTurnMaxMoves)  #higher is slower!
+        #print ("Mutation: slow LEFT turn every (",mutationfactor,") moves")
+        #print ("Color override")
+        self.AdjustSpeed(mutationfactor)
+        r = 255
+        g = 255
+        b = 0
+
+
+      #slow turn right
+      elif (mutationtype == 9):
+        mutationfactor = random.randint(gv.SlowTurnMinMoves,gv.SlowTurnMaxMoves)  #higher is slower!
+        #print ("Mutation: slow righ turn every (",mutationfactor,") moves")
+        #print ("Color override")
+        self.AdjustSpeed(mutationfactor)
+        r = 255
+        g = 0
+        b = 255
+
+
+
+        
+      #Update common properties
+      self.r              = r
+      self.g              = g
+      self.b              = b
+      self.name           = "" + str(self.r) + ' -' + str(self.g)+ ' -' + str(self.b)
+      self.mutationtype   = mutationtype
+      self.mutationfactor = mutationfactor
+      #print ("TheSpeed: ",self.speed)
+    
+    return;
 
 def VirusWorldScanAround(Virus,Playfield):
   # hv represent car location
@@ -2639,8 +2676,9 @@ class World(object):
 
 
 class EmptyObject(object):
-  def __init__(self,name):
-    self.name = name
+  def __init__(self,name='EmptyObject'):
+    self.name  = name
+    self.alive = 0
     
     
     
@@ -5795,7 +5833,7 @@ def ProcessKeypress(Key):
   # 1 - 8 Games
   # 8 = ShowDotZerkRobotTime
   # 0 = ?
-  
+  # m = Debug Playfield/Map
     
   if (Key == "p" or Key == " "):
     time.sleep(5)
@@ -5890,7 +5928,8 @@ def GetKey(stdscr):
     or c == ord("p")
     or c == ord("q")
     or c == ord("r")
-    or c == ord("t") ):
+    or c == ord("t")
+    or c == ord("m") ):
     ReturnChar = chr(c)       
 
   #Look for digits (ascii 48-57 == digits 0-9)
@@ -5915,7 +5954,7 @@ def PollKeyboard():
     print ("Key Pressed: ",Key)
     print ("----------------")
     ProcessKeypress(Key)
-    SaveConfigData()
+    #SaveConfigData()
 
   
   return Key

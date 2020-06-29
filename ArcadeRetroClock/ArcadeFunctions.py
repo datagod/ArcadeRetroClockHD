@@ -4680,6 +4680,12 @@ def FlashDot6(h,v):
   return;
 
 
+def FlashDot7(h,v):
+  setpixel(h,v,255,150,0)
+  unicorn.show()
+  setpixel(h,v,0,0,0)
+  return;
+
 
 
   
@@ -6476,3 +6482,11 @@ def PointTowardsObject8Way(SourceH,SourceV,TargetH,TargetV):
 
 
   
+
+
+def ShowIPAddress():
+  IPAddress = str(subprocess.check_output("hostname -I", shell=True)[:-1]);
+  print ("-->",IPAddress,"<--")
+  af.ShowScrollingBanner2(IPAddress,(af.HighGreen),gv.ScrollSleep )
+  af.ShowScrollingBanner2(IPAddress,(af.HighGreen),gv.ScrollSleep )
+

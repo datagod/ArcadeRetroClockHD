@@ -4117,7 +4117,7 @@ def PlaySpaceDot():
       #Spawn Asteroid1
       m,r = divmod(moves,ChanceOfAsteroid1)
       if (r == 0 and Asteroid1.alive == 0):
-        print ("Spawning Asteroid")
+        #print ("Spawning Asteroid")
         Asteroid1.alive = 1
         Asteroid1.h = random.randint(0,gv.HatWidth-1)
         while (Playfield[Asteroid1.h][0].name != 'empty'):
@@ -4128,7 +4128,7 @@ def PlaySpaceDot():
       #Spawn Asteroid2
       m,r = divmod(moves,ChanceOfAsteroid2)
       if (r == 0 and Asteroid2.alive == 0):
-        print ("Spawning Asteroid2")
+        #print ("Spawning Asteroid2")
         Asteroid2.alive = 1
         Asteroid2.h = random.randint(0,gv.HatWidth-1)
         while (Playfield[Asteroid2.h][0].name != 'empty'):
@@ -4139,7 +4139,7 @@ def PlaySpaceDot():
       #Spawn Asteroid3
       m,r = divmod(moves,ChanceOfAsteroid3)
       if (r == 0 and Asteroid3.alive == 0):
-        print ("Spawning Asteroid3")
+        #print ("Spawning Asteroid3")
         Asteroid3.alive = 1
         Asteroid3.h = random.randint(0,gv.HatWidth-1)
         while (Playfield[Asteroid3.h][0].name != 'empty'):
@@ -4150,7 +4150,7 @@ def PlaySpaceDot():
       #Spawn Asteroid4
       m,r = divmod(moves,ChanceOfAsteroid4)
       if (r == 0 and Asteroid4.alive == 0):
-        print ("Spawning Asteroid4")
+        #print ("Spawning Asteroid4")
         Asteroid4.alive = 1
         Asteroid4.h = random.randint(0,gv.HatWidth-1)
         while (Playfield[Asteroid4.h][0].name != 'empty'):
@@ -4161,7 +4161,7 @@ def PlaySpaceDot():
       #Spawn Asteroid5
       m,r = divmod(moves,ChanceOfAsteroid5)
       if (r == 0 and Asteroid5.alive == 0):
-        print ("Spawning Asteroid5")
+        #print ("Spawning Asteroid5")
         Asteroid5.alive = 1
         Asteroid5.h = random.randint(0,gv.HatWidth-1)
         while (Playfield[Asteroid5.h][0].name != 'empty'):
@@ -7925,7 +7925,7 @@ def ShowDropShip(h,v,action,speed):
     DropShip.Animate(h-2,y+1,'forward',speed)
     DropShip.Animate(h-2,y+1,'forward',speed)
 
-    print("Sleeping")
+    #print("Sleeping")
     for y in range(v-5,-10,-1):
       DropShip.Animate(h-2,y,'forward',speed)
       af.setpixels(Buffer2)
@@ -11667,7 +11667,7 @@ def MoveVirus(Virus,Playfield):
   if (random.randint(0,Virus.mutationrate) == 1):
     Virus.Mutate()
     if (Virus.alive == 0):
-      print ("Accident during mutation. Virus died!")
+      #print ("Accident during mutation. Virus died!")
       Virus.lives = 0
       Virus.speed = 1
       Virus.mutationtype   = 0
@@ -11731,8 +11731,7 @@ def MoveVirus(Virus,Playfield):
       if (random.randint(0,InstabilityFactor) == 1):
         Virus.direction = af.TurnLeftOrRight8Way(Virus.direction)
         Virus.AdjustSpeed(random.randint(-1,1))
-  else:
-    print ("Virus died during mutation.  No movement possible.")
+
   return 
 
 
@@ -11754,7 +11753,7 @@ def CreateDinnerPlate(MapLevel):
                                DisplayH     = 0,
                                DisplayV     = 0,
                                mutationrate = mutationrate,
-                               replicationrate = replicationrate,
+                               replicationrate = gv.replicationrate,
                                mutationdeathrate = mutationdeathrate,
                                VirusStartSpeed = gv.VirusStartSpeed)
                                
@@ -11789,7 +11788,7 @@ def CreateDinnerPlate(MapLevel):
                                DisplayH     = 0,
                                DisplayV     = 0,
                                mutationrate = mutationrate,
-                               replicationrate   = replicationrate,
+                               replicationrate   = gv.replicationrate,
                                mutationdeathrate = mutationdeathrate,
                                VirusStartSpeed   = gv.VirusStartSpeed)
     DinnerPlate.Map[0]  = ([  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ])
@@ -11822,7 +11821,7 @@ def CreateDinnerPlate(MapLevel):
                                DisplayH     = 0,
                                DisplayV     = 0,
                                mutationrate = mutationrate,
-                               replicationrate   = replicationrate,
+                               replicationrate   = gv.replicationrate,
                                mutationdeathrate = mutationdeathrate,
                                VirusStartSpeed   = gv.VirusStartSpeed)
     DinnerPlate.Map[0]  = ([  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ])
@@ -11853,7 +11852,7 @@ def CreateDinnerPlate(MapLevel):
                                DisplayH     = 0,
                                DisplayV     = 0,
                                mutationrate = mutationrate,
-                               replicationrate   = replicationrate,
+                               replicationrate   = gv.replicationrate,
                                mutationdeathrate = mutationdeathrate,
                                VirusStartSpeed   = gv.VirusStartSpeed)
     DinnerPlate.Map[0]  = ([  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ])
@@ -11885,7 +11884,7 @@ def CreateDinnerPlate(MapLevel):
                                DisplayH     = 0,
                                DisplayV     = 0,
                                mutationrate = mutationrate,
-                               replicationrate   = replicationrate,
+                               replicationrate   = gv.replicationrate,
                                mutationdeathrate = mutationdeathrate,
                                VirusStartSpeed   = gv.VirusStartSpeed)
     DinnerPlate.Map[0]  = ([  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ])
@@ -11917,7 +11916,7 @@ def CreateDinnerPlate(MapLevel):
                                DisplayH     = 0,
                                DisplayV     = 0,
                                mutationrate = mutationrate,
-                               replicationrate   = replicationrate,
+                               replicationrate   = gv.replicationrate,
                                mutationdeathrate = mutationdeathrate,
                                VirusStartSpeed   = gv.VirusStartSpeed)
     DinnerPlate.Map[0]  = ([  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ])
@@ -11949,7 +11948,7 @@ def CreateDinnerPlate(MapLevel):
                                DisplayH     = 0,
                                DisplayV     = 0,
                                mutationrate = mutationrate,
-                               replicationrate   = replicationrate,
+                               replicationrate   = gv.replicationrate,
                                mutationdeathrate = mutationdeathrate,
                                VirusStartSpeed   = gv.VirusStartSpeed)
 
@@ -11982,7 +11981,7 @@ def CreateDinnerPlate(MapLevel):
                                DisplayH     = 1,
                                DisplayV     = 1,
                                mutationrate = mutationrate,
-                               replicationrate   = replicationrate,
+                               replicationrate   = gv.replicationrate,
                                mutationdeathrate = mutationdeathrate,
                                VirusStartSpeed   = gv.VirusStartSpeed)
 
@@ -12017,7 +12016,7 @@ def CreateDinnerPlate(MapLevel):
                                DisplayH     = 1,
                                DisplayV     = 1,
                                mutationrate = mutationrate,
-                               replicationrate   = replicationrate,
+                               replicationrate   = gv.replicationrate,
                                mutationdeathrate = mutationdeathrate,
                                VirusStartSpeed   = gv.VirusStartSpeed)
 
@@ -12052,7 +12051,7 @@ def CreateDinnerPlate(MapLevel):
                                DisplayH     = 1,
                                DisplayV     = 1,
                                mutationrate = mutationrate,
-                               replicationrate   = replicationrate,
+                               replicationrate   = gv.replicationrate,
                                mutationdeathrate = mutationdeathrate,
                                VirusStartSpeed   = gv.VirusStartSpeed)
 
@@ -12087,7 +12086,7 @@ def CreateDinnerPlate(MapLevel):
                                DisplayH     = 1,
                                DisplayV     = 1,
                                mutationrate = mutationrate,
-                               replicationrate   = replicationrate,
+                               replicationrate   = gv.replicationrate,
                                mutationdeathrate = mutationdeathrate,
                                VirusStartSpeed   = gv.VirusStartSpeed)
 
@@ -12122,7 +12121,7 @@ def CreateDinnerPlate(MapLevel):
                                DisplayH     = 1,
                                DisplayV     = 1,
                                mutationrate = mutationrate,
-                               replicationrate   = replicationrate,
+                               replicationrate   = gv.replicationrate,
                                mutationdeathrate = mutationdeathrate,
                                VirusStartSpeed   = gv.VirusStartSpeed)
 
@@ -12159,7 +12158,7 @@ def CreateDinnerPlate(MapLevel):
                                DisplayH     = 1,
                                DisplayV     = 1,
                                mutationrate = mutationrate,
-                               replicationrate   = replicationrate,
+                               replicationrate   = gv.replicationrate,
                                mutationdeathrate = mutationdeathrate,
                                VirusStartSpeed   = gv.VirusStartSpeed)
 
@@ -12195,7 +12194,7 @@ def CreateDinnerPlate(MapLevel):
                                DisplayH     = 1,
                                DisplayV     = 1,
                                mutationrate = mutationrate,
-                               replicationrate   = replicationrate,
+                               replicationrate   = gv.replicationrate,
                                mutationdeathrate = mutationdeathrate,
                                VirusStartSpeed   = gv.VirusStartSpeed)
 
@@ -12236,7 +12235,7 @@ def CreateDinnerPlate(MapLevel):
                                DisplayH     = 1,
                                DisplayV     = 1,
                                mutationrate = mutationrate,
-                               replicationrate   = replicationrate,
+                               replicationrate   = gv.replicationrate,
                                mutationdeathrate = mutationdeathrate,
                                VirusStartSpeed   = gv.VirusStartSpeed)
 
@@ -12281,7 +12280,7 @@ def CreateDinnerPlate(MapLevel):
                                DisplayH     = 1,
                                DisplayV     = 1,
                                mutationrate = mutationrate,
-                               replicationrate   = replicationrate,
+                               replicationrate   = gv.replicationrate,
                                mutationdeathrate = mutationdeathrate,
                                VirusStartSpeed   = gv.VirusStartSpeed)
 
@@ -12337,7 +12336,7 @@ def CreateDinnerPlate(MapLevel):
                                DisplayH     = 1,
                                DisplayV     = 1,
                                mutationrate = mutationrate,
-                               replicationrate   = replicationrate,
+                               replicationrate   = gv.replicationrate,
                                mutationdeathrate = mutationdeathrate,
                                VirusStartSpeed   = gv.VirusStartSpeed)
 
@@ -12393,7 +12392,7 @@ def CreateDinnerPlate(MapLevel):
                                DisplayH     = 1,
                                DisplayV     = 1,
                                mutationrate = mutationrate,
-                               replicationrate   = replicationrate,
+                               replicationrate   = gv.replicationrate,
                                mutationdeathrate = mutationdeathrate,
                                VirusStartSpeed   = gv.VirusStartSpeed)
 
@@ -12402,15 +12401,15 @@ def CreateDinnerPlate(MapLevel):
     DinnerPlate.Map[0]   = ([  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ])
     DinnerPlate.Map[1]   = ([  1, 2, 1, 0, 0, 0, 0, 2,23, 2, 0, 0, 0, 0, 0,15, 2, 1 ])
     DinnerPlate.Map[2]   = ([  1, 1, 0, 0, 0, 0, 0, 3,23, 2, 0, 0, 0, 0, 0,15,15, 1 ])
-    DinnerPlate.Map[3]   = ([  1, 0, 0, 0, 3, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,15, 0, 1 ])
-    DinnerPlate.Map[4]   = ([  1, 0, 0, 3, 1, 3, 0, 2, 0, 2, 0, 0, 0, 0, 0, 0, 0, 1 ])
-    DinnerPlate.Map[5]   = ([  1, 0, 0, 0, 3, 2, 2, 2, 0, 2, 2, 0, 0, 0, 0, 0, 0, 1 ])
-    DinnerPlate.Map[6]   = ([  1, 0, 0, 0, 0, 2,23, 2, 0, 0,23, 2, 0, 0, 0, 0, 0, 1 ])
-    DinnerPlate.Map[7]   = ([  1,19, 0, 0, 0, 2, 0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0, 1 ])
-    DinnerPlate.Map[8]   = ([  1,19, 2, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 1 ])
-    DinnerPlate.Map[9]   = ([  1, 2, 3, 0, 3, 2, 0, 0, 0, 0, 0, 2, 2, 0, 0, 1, 2, 1 ])
-    DinnerPlate.Map[10]  = ([  1, 2, 2, 0, 1, 2,23, 2, 0, 2,23, 2, 0, 0, 0, 0, 1, 1 ])
-    DinnerPlate.Map[11]  = ([  1,32, 2, 0, 0, 2, 2, 2, 0, 2, 2, 2, 0, 0, 0, 0, 0, 1 ])
+    DinnerPlate.Map[3]   = ([  1, 0, 0, 0, 4, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,15, 0, 1 ])
+    DinnerPlate.Map[4]   = ([  1, 0, 0, 4, 4, 3, 0, 2, 0, 2, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    DinnerPlate.Map[5]   = ([  1, 0, 0, 0, 3, 2, 2, 2, 0, 4, 4, 0, 0, 0, 0, 0, 0, 1 ])
+    DinnerPlate.Map[6]   = ([  1, 0, 0, 0, 0, 2,23, 2, 0, 0,23, 4, 0, 0, 0, 0, 0, 1 ])
+    DinnerPlate.Map[7]   = ([  1,19, 0, 0, 0, 2, 0, 0, 0, 0, 0, 4, 2, 0, 0, 0, 0, 1 ])
+    DinnerPlate.Map[8]   = ([  1,19, 2, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4, 4, 1 ])
+    DinnerPlate.Map[9]   = ([  1, 2, 3, 0, 3, 2, 0, 0, 0, 0, 0, 4, 2, 0, 0, 4, 4, 1 ])
+    DinnerPlate.Map[10]  = ([  1, 2, 2, 0, 1, 2,23, 2, 0, 4,23, 4, 0, 0, 0, 0, 1, 1 ])
+    DinnerPlate.Map[11]  = ([  1,32, 2, 0, 0, 4, 4, 4, 0, 4, 4, 4, 0, 0, 0, 0, 0, 1 ])
     DinnerPlate.Map[12]  = ([  1,32,32, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 7, 1 ])
     DinnerPlate.Map[13]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 7, 1 ])
     DinnerPlate.Map[14]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 7, 1 ])
@@ -12431,7 +12430,7 @@ def CreateDinnerPlate(MapLevel):
                                DisplayH     = 1,
                                DisplayV     = 1,
                                mutationrate = mutationrate,
-                               replicationrate   = replicationrate,
+                               replicationrate   = gv.replicationrate,
                                mutationdeathrate = mutationdeathrate,
                                VirusStartSpeed   = gv.VirusStartSpeed)
 
@@ -12474,7 +12473,7 @@ def CreateDinnerPlate(MapLevel):
                                DisplayH     = 1,
                                DisplayV     = 1,
                                mutationrate = mutationrate,
-                               replicationrate   = replicationrate,
+                               replicationrate   = gv.replicationrate,
                                mutationdeathrate = mutationdeathrate,
                                VirusStartSpeed   = gv.VirusStartSpeed)
 
@@ -12517,7 +12516,7 @@ def CreateDinnerPlate(MapLevel):
                                DisplayH     = 1,
                                DisplayV     = 1,
                                mutationrate = mutationrate,
-                               replicationrate   = replicationrate,
+                               replicationrate   = gv.replicationrate,
                                mutationdeathrate = mutationdeathrate,
                                VirusStartSpeed   = gv.VirusStartSpeed)
 
@@ -12556,7 +12555,7 @@ def CreateDinnerPlate(MapLevel):
                                DisplayH     = 1,
                                DisplayV     = 1,
                                mutationrate = mutationrate ,
-                               replicationrate   = replicationrate,
+                               replicationrate   = gv.replicationrate,
                                mutationdeathrate = mutationdeathrate,
                                VirusStartSpeed   = gv.VirusStartSpeed)
 
@@ -12598,7 +12597,7 @@ def CreateDinnerPlate(MapLevel):
                                DisplayH     = 2,
                                DisplayV     = 2,
                                mutationrate = mutationrate,
-                               replicationrate   = replicationrate,
+                               replicationrate   = gv.replicationrate,
                                mutationdeathrate = mutationdeathrate,
                                VirusStartSpeed   = gv.VirusStartSpeed)
 
@@ -12638,7 +12637,7 @@ def CreateDinnerPlate(MapLevel):
                                DisplayH     = 4,
                                DisplayV     = 4,
                                mutationrate = mutationrate,
-                               replicationrate   = replicationrate,
+                               replicationrate   = gv.replicationrate,
                                mutationdeathrate = mutationdeathrate,
                                VirusStartSpeed   = gv.VirusStartSpeed)
 
@@ -12700,7 +12699,7 @@ def CreateDinnerPlate(MapLevel):
                                DisplayH     = 4,
                                DisplayV     = 4,
                                mutationrate = mutationrate,
-                               replicationrate   = replicationrate,
+                               replicationrate   = gv.replicationrate,
                                mutationdeathrate = mutationdeathrate,
                                VirusStartSpeed   = gv.VirusStartSpeed)
 
@@ -12761,7 +12760,7 @@ def CreateDinnerPlate(MapLevel):
                                DisplayH     = 0,
                                DisplayV     = 0,
                                mutationrate = mutationrate,
-                               replicationrate   = replicationrate,
+                               replicationrate   = gv.replicationrate,
                                mutationdeathrate = mutationdeathrate,
                                VirusStartSpeed   = gv.VirusStartSpeed)
 
@@ -12797,7 +12796,7 @@ def CreateDinnerPlate(MapLevel):
                                DisplayH     = 0,
                                DisplayV     = 0,
                                mutationrate = mutationrate,
-                               replicationrate   = replicationrate,
+                               replicationrate   = gv.replicationrate,
                                mutationdeathrate = mutationdeathrate,
                                VirusStartSpeed   = gv.VirusStartSpeed)
 
@@ -12834,7 +12833,7 @@ def CreateDinnerPlate(MapLevel):
                                DisplayH     = 1,
                                DisplayV     = 1,
                                mutationrate = mutationrate,
-                               replicationrate   = replicationrate,
+                               replicationrate   = gv.replicationrate,
                                mutationdeathrate = mutationdeathrate,
                                VirusStartSpeed   = gv.VirusStartSpeed)
 
@@ -12872,7 +12871,7 @@ def CreateDinnerPlate(MapLevel):
                                DisplayH     = 0,
                                DisplayV     = 0,
                                mutationrate = mutationrate,
-                               replicationrate   = replicationrate,
+                               replicationrate   = gv.replicationrate,
                                mutationdeathrate = mutationdeathrate,
                                VirusStartSpeed   = gv.VirusStartSpeed)
 
@@ -12933,7 +12932,6 @@ def FlashAllViruses(Viruses,VirusCount,DinnerPlate,CameraH,CameraV):
 #-----------------------------
 # Outbreak Global Variables --
 #-----------------------------
-replicationrate   = 2000 # higher = lower chance of replicating
 InstabilityFactor = 50
 ScrollSpeedLong   = 500
 ScrollSpeedShort  = 5
@@ -12978,10 +12976,9 @@ def PlayOutbreak():
   VirusMaxCount     = 125 #if virus count reaches 75%, end level
   VirusDeleted      = 0
   DominanceCount    = 0
-  DominanceMaxCount = 200 #how many ticks with there being only one virus
   ClockSprite       = af.CreateClockSprite(12)
   ClockSprite.on    = 0
-
+  StrainCreated     = 0
   
   
   # #Camera Path
@@ -13069,12 +13066,15 @@ def PlayOutbreak():
 
   print ("CameraHV: ",CameraH, CameraV)
 
-  af.ShowScrollingBanner("Outbreak!",af.SDLowYellowR,af.SDLowYellowG,af.SDLowYellowB,gv.ScrollSleep *0.8)
+  #af.ShowScrollingBanner("Outbreak!",af.SDLowYellowR,af.SDLowYellowG,af.SDLowYellowB,gv.ScrollSleep *0.8)
   DinnerPlate.DisplayWindowZoom(CameraH,CameraV,2,16,0.025)
   
   
   
 
+  #--------------------------------
+  #-- Main timing loop           --
+  #--------------------------------
 
   NameCount = 1
 
@@ -13096,7 +13096,9 @@ def PlayOutbreak():
       elif (Key == 'm'):
         DinnerPlate.DebugPlayfield()
 
-      print ("Moves:",gv.VirusMoves," VirusCount:",VirusCount,"                              ",end="\r")      
+
+    #update text window
+    print ("Moves:",gv.VirusMoves," VirusCount:",VirusCount,"NameCount:",NameCount," replrate:",gv.replicationrate," mdeathrate:",mutationdeathrate,"   ",end="\r")      
 
 
     
@@ -13108,8 +13110,7 @@ def PlayOutbreak():
     firstname = Viruses[0].name
     NameCount = 1
     
-    
-    
+        
     #It seems that Python determines the "VirusCount-1" value once, and does not re-evaluate.  When some of the virises die, 
     #this thorws off the loop and counts.  I will deal with this internally.
     #for x in range (0,VirusCount-1):
@@ -13162,7 +13163,7 @@ def PlayOutbreak():
         for v in range(0,DinnerPlate.height):
           for h in range(0,DinnerPlate.width):
             if (DinnerPlate.Playfield[v][h].alive == 0 and DinnerPlate.Playfield[v][h].name != 'EmptyObject'):
-              print('Zombie detected:',v,h,DinnerPlate.Playfield[v][h].name)
+              #print('Zombie detected:',v,h,DinnerPlate.Playfield[v][h].name)
               DinnerPlate.DebugPlayfield()
               DinnerPlate.Playfield[v][h] = af.EmptyObject("EmptyObject")
 
@@ -13183,37 +13184,13 @@ def PlayOutbreak():
             VirusCount = len(Viruses)
 
 
+
+
       #---------------------------
       #-- End Virus loop        --
       #---------------------------
       x = x + 1
       
-
-
-      
-      
-
-
-## NOT NEEDED IN HD MODE
-    # #----------------------------
-    # #-- Scroll Display Window  --  
-    # #----------------------------
-    # m,r = divmod(moves,CameraSpeed)
-    # if (r == 0):
-      # PathPosition = PathPosition + 1
-      # if (PathPosition == PathCount):
-        # PathPosition = 0
-      # CameraH, CameraV, CameraSpeed =  CameraPath[PathPosition]
-     
-      # #print ("PathPosition CameraH CameraV:",PathPosition,CameraH,CameraV)
-      
-      # VirusesInWindow = DinnerPlate.CountVirusesInWindow(CameraH, CameraV)
-      # #print ("VirusesInWindow: ",VirusesInWindow)
-      # if ( VirusesInWindow == 0):
-        # print ("No viruses in the window, scrolling past")
-        # CameraSpeed = ScrollSpeedShort
-   
-
 
 
     #-------------------------------------------
@@ -13225,15 +13202,23 @@ def PlayOutbreak():
       #DinnerPlate.DisplayWindow(CameraH, CameraV)
       DominanceCount = DominanceCount + 1
       #print ("NameCount:",NameCount,"DominanceCount:",DominanceCount,"DominanceMaxCount:",DominanceMaxCount)
-      
+     
       #one virus remains, increase chance of spreading
-      replicationrate   = 1
-      mutationdeathrate = 5000
+      #replicationrate   = 1
+      #mutationdeathrate = 5000
+
+      
+      #This particular virus is a successful strain, we want to collect it to the center
+      #Point viruses towards the center
+      if (StrainCreated == 0):
+        for x in range(0,VirusCount):
+          Viruses[x].direction = af.PointTowardsObject8Way(Viruses[x].h,Viruses[x].v,(gv.HatWidth/2),(gv.HatHeight/2))
+          StrainCreated == 1
 
 
       #print ("DominanceCount:",DominanceCount,"DominanceMaxCount:",DominanceMaxCount,"VirusCount:",VirusCount,"VirusMaxCount:",VirusMaxCount)
       #if one virus dominates for X ticks, reset and load next level
-      if (DominanceCount >= DominanceMaxCount) or(VirusCount >= VirusMaxCount):
+      if (DominanceCount >= gv.DominanceMaxCount) or(VirusCount >= VirusMaxCount):
         print ("VirusCount:",VirusCount)
         #print ("Flashdot hv: ",Viruses[0].h,Viruses[0].v)
         #FlashDot (Viruses[0].h - CameraH,Viruses[0].v + CameraV,0.5)
@@ -13242,7 +13227,7 @@ def PlayOutbreak():
         FlashAllViruses(Viruses,VirusCount,DinnerPlate,CameraH,CameraV)
         DinnerPlate.DisplayWindowZoom(CameraH,CameraV,16,2,0.025)
 
-        af.ShowScrollingBanner2("Strain # " + firstname + " secured" ,(af.MedGreen),gv.ScrollSleep)
+        af.ShowScrollingBanner2("Strain Secured" ,(af.MedGreen),gv.ScrollSleep)
         
         #Prepare new level
         DominanceCount    = 0
@@ -13261,6 +13246,7 @@ def PlayOutbreak():
         nextname = ""
     else:
       DominanceCount = 0
+      StrainCreated  = 0
         
     
     #------------------
@@ -13308,18 +13294,19 @@ def PlayOutbreak():
   time.sleep(3)
   unicorn.off()
   DinnerPlate.DisplayWindowZoom(CameraH,CameraV,16,2,0.025)
-  af.ShowScrollingBanner2("Infection Cured!",(af.MedYellow),gv.ScrollSleep *0.8)
-  af.ShowScrollingBanner2("Score: " + str(gv.VirusMoves) ,(af.MedGreen),gv.ScrollSleep *0.8)
+
+  if(VirusCount == 0):
+    af.ShowScrollingBanner2("infection Cured!",(af.MedYellow),gv.ScrollSleep *0.8)
+    af.ShowScrollingBanner2("Score: " + str(gv.VirusMoves) ,(af.MedGreen),gv.ScrollSleep *0.8)
+  else:
+    af.ShowScrollingBanner2("danger! pandemic protocols initiated",(af.HighRed),gv.ScrollSleep *0.8)
+    af.ShowScrollingBanner2("game over",(af.HighYellow),gv.ScrollSleep *0.8)
+
+
   unicorn.off()
   return
 
 
-
-def ShowIPAddress():
-  IPAddress = str(subprocess.check_output("hostname -I", shell=True)[:-1]);
-  print ("-->",IPAddress,"<--")
-  af.ShowScrollingBanner2(IPAddress,(af.HighGreen),gv.ScrollSleep )
-  af.ShowScrollingBanner2(IPAddress,(af.HighGreen),gv.ScrollSleep )
 
 
 
@@ -13896,10 +13883,10 @@ def CreateParticleWorld(MapLevel):
                            height       = 16,
                            Map          = [[]],
                            Playfield    = [[]],
-                           CameraH      = 0,
-                           CameraV      = 0,
-                           DisplayH     = 0,
-                           DisplayV     = 0,
+                           CameraH      = 1,
+                           CameraV      = 1,
+                           DisplayH     = 1,
+                           DisplayV     = 1,
                            Gravity      = 1)
 
                                                         
@@ -14406,8 +14393,17 @@ print("-----------------")
 #ScrollScreenShowChickenWormTime('up',gv.ScrollSleep)
 
 
+
+
+PlayOutbreak()
+
+
+
+
+
 print(TheRandomMessage)
-af.ShowScrollingBanner(TheRandomMessage,af.SDLowYellowR,af.SDLowYellowG,af.SDLowYellowB,gv.ScrollSleep )
+#af.ShowScrollingBanner(TheRandomMessage,af.SDLowYellowR,af.SDLowYellowG,af.SDLowYellowB,gv.ScrollSleep )
+af.ShowScrollingBanner2(TheRandomMessage,af.MedYellow,gv.ScrollSleep )
 #ShowLongIntro(gv.ScrollSleep)
 
 
@@ -14432,6 +14428,7 @@ while (1==1):
 
 
   try:
+
 
 
     #PlayOrbits()

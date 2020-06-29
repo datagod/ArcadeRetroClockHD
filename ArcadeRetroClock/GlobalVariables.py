@@ -37,30 +37,31 @@ PacDotHighScore = 0
 #-----------------------------
 # Outbreak Global Variables --
 #-----------------------------
-replicationrate   = 200
 VirusTopSpeed     = 1
-VirusBottomSpeed  = 10
+VirusBottomSpeed  = 5
+VirusStartSpeed   = 15    #starting speed of the viruses
 MinBright         = 100
 MaxBright         = 255
 
 OriginalMutationRate      = 500
-OriginalReplicationRate   = 200
+OriginalReplicationRate   = 1000
+replicationrate           = OriginalReplicationRate
 FreakoutReplicationRate   = 10   #new replication rate when a virus freaksout
-MaxVirusMoves             = 100000 #after this many moves the level is over
-FreakoutMoves             = 58000 #after this many moves, the viruses will replicate and mutate at a much greater rate
-OriginalMutationDeathRate = 20
+MaxVirusMoves             = 5000 #after this many moves the level is over
+FreakoutMoves             = 4500 #after this many moves, the viruses will replicate and mutate at a much greater rate
+OriginalMutationDeathRate = 2
 mutationrate      = 0
-mutationdeathrate = 0
+mutationdeathrate = 5
 VirusMoves        = 0
 ClumpingSpeed     = 10    #This modifies the speed of viruses that contact each other
 ReplicationSpeed  = 1     #When a virus replicates, it will be a bit slower.  This number is added to current speed.
 ChanceOfSpeedup   = 1     #determines how often a lone virus will spontaneously speed up
 SlowTurnMinMoves  = 5     #number of moves a mutated virus moves before turning
 SlowTurnMaxMoves  = 25    #number of moves a mutated virus moves before turning
-VirusStartSpeed   = 20    #staring speed of the viruses
-MaxReplications   = 5     #Maximum number of replications, if surpassed the virus dies
+MaxReplications   = 2     #Maximum number of replications, if surpassed the virus dies
 MaxMutations      = 5     #Maximum number of mutations, if surpassed the virus dies
-InfectionChance   = 5     #Chance of one virus infecting another, lower the number greater the chance
+InfectionChance   = 1     #Chance of one virus infecting another, lower the number greater the chance
+DominanceMaxCount = 500   #how many ticks with there being only one virus, when reached level over
 
 
 #----------------------------

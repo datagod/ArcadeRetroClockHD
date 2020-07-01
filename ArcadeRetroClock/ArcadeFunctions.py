@@ -1229,8 +1229,9 @@ class Virus(object):
     self.radarrange      = 20
     self.destination     = ""
     self.mutationtype    = mutationtype
-    self.mutationrate    = mutationrate   #high number, greater chance 
-    self.mutationfactor  = mutationfactor #used to impact amount of mutation
+    self.mutationrate    = mutationrate      #high number, greater chance 
+    self.mutationfactor  = mutationfactor    #used to impact amount of mutation
+    self.internalcounter = 0                 #used to count moves between mutation affects (i.e. turn left every 3 moves)
     self.replicationrate = replicationrate    
     self.mutationdeathrate = mutationdeathrate
     self.mutationtypes     = 9
@@ -1327,7 +1328,7 @@ class Virus(object):
 
       
       #Mutations get a new name and color
-      x = random.randint(1,7)
+      x = random.randint(1,15)
       if (x == 1):
         #Big Red
         r = random.randint(gv.MinBright,gv.MaxBright)
@@ -1364,7 +1365,7 @@ class Virus(object):
         g = random.randint(gv.MinBright,gv.MaxBright)
         b = random.randint(gv.MinBright,gv.MaxBright)
 
-      if (x == 7):
+      if (x >= 7 and x<= 15):
         #swamp mix
         r = random.randint(gv.MinBright,gv.MaxBright)
         g = random.randint(gv.MinBright,gv.MaxBright)
@@ -1374,21 +1375,25 @@ class Virus(object):
     
       #Directional Behavior - turns left a little
       if (mutationtype == 1):
+        #print ("Mutation: turn left a little", self.speed, mutationfactor)
         mutationfactor       = random.randint(1,2)
         self.AdjustInfectionChance(mutationfactor * -1)
 
       #Directional Behavior - turns left a lot
       elif (mutationtype == 2):
+        #print ("Mutation: turn left a lot", self.speed, mutationfactor)
         mutationfactor       = random.randint(2,3)
         self.AdjustInfectionChance(mutationfactor * -1)
 
       #Directional Behavior - turns right a little
       elif (mutationtype == 3):
+        #print ("Mutation: turn right a little", self.speed, mutationfactor)
         mutationfactor    = random.randint(1,2)
         self.AdjustInfectionChance(mutationfactor * -1)
 
       #Directional Behavior - turns right a lot
       elif (mutationtype == 4):
+        #print ("Mutation: turn right a lot", self.speed, mutationfactor)
         mutationfactor       = random.randint(2,3)
         self.AdjustInfectionChance(mutationfactor * -1)
 
@@ -1413,7 +1418,6 @@ class Virus(object):
       elif (mutationtype == 7):
         mutationfactor = random.randint(1,10)
         #print ("Mutation: wobble",mutationfactor)
-        #print ("Color override")
         self.AdjustSpeed(mutationfactor)
         self.AdjustInfectionChance(mutationfactor * -1)
 
@@ -1426,7 +1430,6 @@ class Virus(object):
       elif (mutationtype == 8):
         mutationfactor = random.randint(gv.SlowTurnMinMoves,gv.SlowTurnMaxMoves)  #higher is slower!
         #print ("Mutation: slow LEFT turn every (",mutationfactor,") moves")
-        #print ("Color override")
         self.AdjustSpeed(mutationfactor)
         r = 255
         g = 255
@@ -1437,7 +1440,6 @@ class Virus(object):
       elif (mutationtype == 9):
         mutationfactor = random.randint(gv.SlowTurnMinMoves,gv.SlowTurnMaxMoves)  #higher is slower!
         #print ("Mutation: slow righ turn every (",mutationfactor,") moves")
-        #print ("Color override")
         self.AdjustSpeed(mutationfactor)
         r = 255
         g = 0

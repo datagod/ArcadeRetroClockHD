@@ -1238,6 +1238,7 @@ class Virus(object):
     self.replications      = 0
     self.mutations         = 0
     self.infectionchance   = gv.InfectionChance
+    self.chanceofdying     = gv.ChanceOfDying
 
 
   def Display(self):
@@ -2681,6 +2682,7 @@ class EmptyObject(object):
   def __init__(self,name='EmptyObject'):
     self.name  = name
     self.alive = 0
+    self.lives = 0
     
     
     

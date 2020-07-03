@@ -2213,7 +2213,7 @@ def ScanSuperWorms(h,v):
     #wormdot obstacles are green
     #Every time they are scanned, they grow dim and eventually disappear
     elif (r == 0 and g >= GreenObstacleMinVisible and b == 0):
-      print ("Green obstacle found g:,g")  
+      #print ("Green obstacle found g:,g")  
       g = g - GreenObstacleFadeValue
       if (g < GreenObstacleMinVisible):
         af.setpixel(h,v,0,0,0)
@@ -2356,7 +2356,7 @@ def MoveDot(Dot):
   #fades, almost as if the worm is eating it.  The worm ends up shorter though!  Weird.
   #print ('ItemList[3]:', ItemList[3])
   if ItemList[3]  == 'obstacle':
-    print ("Obstacle hit!  Draining our power!")
+    #print ("Obstacle hit!  Draining our power!")
     r,g,b = af.getpixel(h,v)
     if (g > 45):
       r,g,b = FadePixel(r,g,b,1)
@@ -2418,7 +2418,7 @@ def ReverseOrDie(WormDot):
   #print ("Direction: ", WormDot.direction, " NewDirection: ",NewDirection)
   #FlashDot4(h,v,.2)
   ItemList = ScanSuperWomrs(h,v,NewDirection)
-  print (ItemList)
+  #print (ItemList)
   if ('empty' in ItemList):
     WormDot.ReverseTrail()
     #print ("** Full Reverse! **")
@@ -2654,7 +2654,7 @@ def PlaySuperWorms():
         SleepTime = SleepTime * 0.9
         if (SleepTime < 0.001):
           SleepTime = 0.001
-        print ("Speedup:",SleepTime)
+        #print ("Speedup:",SleepTime)
       
       if (SleepTime > 0.001):
         time.sleep(SleepTime)
@@ -2840,11 +2840,11 @@ def PlayWormDot():
 
   
   while (LevelCount > 0):
-    print ("show worms")
+    #print ("show worms")
     unicorn.off()
     #Display animation and clock every 30 seconds
 
-    print ("Show level")
+    #print ("Show level")
     af.ShowLevelCount(LevelCount)
     LevelCount = LevelCount - 1
     unicorn.off()
@@ -3841,7 +3841,7 @@ def PlaySpaceDot():
   while (LevelCount > 0):
     #print ("show playership")
     unicorn.off()
-    print ("Show level")
+    #print ("Show level")
 
     af.ShowLevelCount(LevelCount)
     LevelCount = LevelCount - 1
@@ -12854,11 +12854,11 @@ def CreateDinnerPlate(MapLevel):
     DinnerPlate.Map[1]  = ([  1, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 1 ])
     DinnerPlate.Map[2]  = ([  1, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 1 ])
     DinnerPlate.Map[3]  = ([  1, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 1 ])
-    DinnerPlate.Map[4]  = ([  1, 4, 0, 4, 0, 0, 0, 0, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 4, 1 ])
+    DinnerPlate.Map[4]  = ([  1, 4, 0, 4, 0, 0, 0, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 4, 1 ])
     DinnerPlate.Map[5]  = ([  1, 4, 4, 4, 0, 0, 0, 4,22,22,22, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 4, 1 ])#
     DinnerPlate.Map[6]  = ([  1, 0, 0, 0, 0, 0, 0, 4,21,21,21, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
     DinnerPlate.Map[7]  = ([  1, 0, 0, 0, 0, 0, 0, 4,20,20,20, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
-    DinnerPlate.Map[8]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
+    DinnerPlate.Map[8]  = ([  1, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
     DinnerPlate.Map[9]  = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 1 ])
     DinnerPlate.Map[10] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
     DinnerPlate.Map[11] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
@@ -13198,6 +13198,15 @@ def PlayOutbreak():
   while (finished == "N" and gv.VirusMoves < gv.MaxVirusMoves):
     gv.VirusMoves = gv.VirusMoves + 1
     
+    #We will increase bottome speed 20 times over the course of a full game
+    m,r = divmod(gv.VirusMoves, (gv.MaxVirusMoves / 20))
+    if (r == 0):
+      gv.VirusBottomSpeed = gv.VirusBottomSpeed -1
+      gv.VirusTopSpeed    = gv.VirusTopSpeed -1
+      if (gv.VirusTopSpeed < 1):
+        gv.VirusTopSpeed = 1
+      if (gv.VirusBottomSpeed < 1):
+        gv.VirusBottomSpeed = 1
 
     #--------------------------------
     #Check for keyboard input      --
@@ -13215,7 +13224,7 @@ def PlayOutbreak():
 
 
     #update text window
-    #print ("Moves:",gv.VirusMoves," VirusCount:",VirusCount,"NameCount:",NameCount," replrate:",gv.replicationrate," mdeathrate:",mutationdeathrate,"   ",end="\r")      
+    print ("Moves:",gv.VirusMoves," VirusCount:",VirusCount,"NameCount:",NameCount,"      ",end="\r")      
 
 
     
@@ -13290,7 +13299,6 @@ def PlayOutbreak():
         #----------------------
         #-- Replication      --  
         #----------------------
-        
         #check virus internal replication rate, or if only one type of virus left check
         #the main rate as an override
         if ((random.randint(0,Viruses[x].replicationrate) == 1) or (VirusCount == 1 and (random.randint(0,replicationrate) == 1))):
@@ -13302,12 +13310,58 @@ def PlayOutbreak():
 
 
 
-      
+
+
+      #----------------------
+      #-- Random Death     --  
+      #----------------------
+      #check virus internal death rate
+      if (VirusDeleted == 0):
+
+        #Too many strains?  Kick them in the butt.  Greater chance of dying, then reset
+        if ((random.randint(0,Viruses[x].chanceofdying) == 1)):
+          Viruses[x].alive = 0
+          Viruses[x].lives = 0
+          Viruses[x] = af.EmptyObject("EmptyObject")
+          del Viruses[x]
+          VirusCount = VirusCount -1
+          #print ("VirusCount:",VirusCount)
+          VirusDeleted = 1
+
+
+        else:
+          if(NameCount >= gv.VirusNameSpeedupCount):
+            Viruses[x].chanceofdying = gv.GreatChanceOfDying
+            Viruses[x].chanceofdying = gv.ChanceOfDying
+
+
+
+
+          
+
+
+
+
       #---------------------------
       #-- End Virus loop        --
       #---------------------------
       x = x + 1
       
+
+      #---------------------------
+      #-- Move towards center   --
+      #---------------------------
+      #
+      if (random.randint(1,gv.ChanceOfHeadingToHV) == 1):
+        for x in range(0,VirusCount):
+          Viruses[x].direction = af.PointTowardsObject8Way(Viruses[x].h,Viruses[x].v,(DinnerPlate.width/2),(DinnerPlate.height/2))
+          
+
+
+
+      #-------------------------------------------------
+      #-- Adjust parameters if too many viruses alive --
+      #-------------------------------------------------
 
       #if too many virus strains, increase speed
       #otherwise reset to original speeds
@@ -13315,9 +13369,9 @@ def PlayOutbreak():
         gv.VirusTopSpeed    = 1
         gv.VirusBottomSpeed = 1
         mutationdeathrate   = 1
-      else:
-        gv.VirusTopSpeed    = OldVirusTopSpeed
-        gv.VirusBottomSpeed = OldVirusBottomSpeed
+      #else:
+      #  gv.VirusTopSpeed    = OldVirusTopSpeed
+      #  gv.VirusBottomSpeed = OldVirusBottomSpeed
 
     
 
@@ -14575,12 +14629,13 @@ while (1==1):
 
     ActivateClockMode(10)    
 
+    PlayPacDot(NumDots)
+    ActivateClockMode(60)    
+
+
     PlayOutbreak()
     ActivateClockMode(60)    
 
-    PlayPacDot(NumDots)
-    ActivateClockMode(60)    
- 
 
     PlayDotInvaders()
     ActivateClockMode(60)    

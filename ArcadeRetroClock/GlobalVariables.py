@@ -37,9 +37,9 @@ PacDotHighScore = 0
 #-----------------------------
 # Outbreak Global Variables --
 #-----------------------------
-VirusTopSpeed     = 1
-VirusBottomSpeed  = 10
-VirusStartSpeed   = 20    #starting speed of the viruses
+VirusTopSpeed     = 3
+VirusBottomSpeed  = 15
+VirusStartSpeed   = 15    #starting speed of the viruses
 MinBright         = 100
 MaxBright         = 255
 
@@ -58,11 +58,15 @@ ClumpingSpeed         = 20    #This modifies the speed of viruses that contact e
 ReplicationSpeed      = 3     #When a virus replicates, it will be a bit slower.  This number is added to current speed.
 ChanceOfSpeedup       = 3     #determines how often a lone virus will spontaneously speed up
 SlowTurnMinMoves      = 5     #number of moves a mutated virus moves before turning
-SlowTurnMaxMoves      = 25    #number of moves a mutated virus moves before turning
+SlowTurnMaxMoves      = 10    #number of moves a mutated virus moves before turning
 MaxReplications       = 5     #Maximum number of replications, if surpassed the virus dies
-InfectionChance       = 1     #Chance of one virus infecting another, lower the number greater the chance
+InfectionChance       = 2     #Chance of one virus infecting another, lower the number greater the chance
 DominanceMaxCount     = 200   #how many ticks with there being only one virus, when reached level over
 VirusNameSpeedupCount = 50    #when this many virus strains are on the board, speed them up
+ChanceOfDying         = 1000  #random chance of a virus dying
+GreatChanceOfDying    = 25    #random chance of a virus dying when too many straings are alive
+ChanceOfHeadingToHV   = 5000  #random chance of all viruses being interested in the same location
+
 
 #----------------------------
 #-- PacDot                 --

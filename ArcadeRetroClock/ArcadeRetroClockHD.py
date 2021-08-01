@@ -14815,17 +14815,15 @@ while (1==1):
 
     #PlayOrbits()
 
-
-    
+    PlayOutbreak()
     ActivateClockMode(600)    
+    
     PlayDotInvaders()
     ActivateClockMode(600)    
     
     PlayPacDot(NumDots)
     ActivateClockMode(600)    
 
-    PlayOutbreak()
-    ActivateClockMode(600)    
     
     PlaySpaceDot()
     ActivateClockMode(600)    

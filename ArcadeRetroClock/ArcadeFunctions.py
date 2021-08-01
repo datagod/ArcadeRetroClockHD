@@ -6886,6 +6886,7 @@ def PointTowardsObject8Way(SourceH,SourceV,TargetH,TargetV):
 
 def ShowIPAddress():
   IPAddress = str(subprocess.check_output("hostname -I", shell=True)[:-1]);
+  IPAddress = IPAddress[2:17]
   print ("-->",IPAddress,"<--")
   ShowScrollingBanner2(IPAddress,(HighGreen),gv.ScrollSleep )
   ShowScrollingBanner2(IPAddress,(HighGreen),gv.ScrollSleep )

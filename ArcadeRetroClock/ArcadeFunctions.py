@@ -39,6 +39,13 @@
 #    - adding ability to zoom when displaying a window                       --
 #                                                                            --
 #------------------------------------------------------------------------------
+#   Version: 1.02                                                            --
+#   Date:    November 8, 2020                                                --
+#   Changes:                                                                 --
+#    - adding new behaviour to virus including ability to slow down while    --
+#      eating                                                                --
+#                                                                            --
+#------------------------------------------------------------------------------
 
 import GlobalVariables as gv
 import unicornhathd as unicorn
@@ -64,6 +71,16 @@ import unicornhathd as unicorn
 
 #For capturing keypresses
 import curses
+
+#Crypto
+from pycoingecko import CoinGeckoAPI
+
+
+#JSON
+import requests
+import simplejson as json
+
+
 
 
 #--------------------------------------
@@ -882,6 +899,68 @@ class Sprite(object):
       self.Scroll(h,gv.HatWidth-1,"left",(gv.HatWidth + self.height),ScrollSleep)
 
 
+  def DisplayNoBlack(self,h1,v1):
+    x = 0,
+    y = 0
+
+    #print ("Display:",self.width, self.height, self.r, self.g, self.b,v1,h1)
+    for count in range (0,(self.width * self.height)):
+      y,x = divmod(count,self.width)
+      if (CheckBoundary(x+h1,y+v1) == 0):
+        if (not(self.r == 0 and self.g == 0 and self.b == 0)):
+          setpixel(x+h1,y+v1,self.r,self.g,self.b)
+    
+
+
+  def Float(self,h,v,direction,moves,delay):
+    #Scroll across the screen, floating over the background
+    
+    x = 0
+    oldh = 0
+    #Capture Background
+    Buffer = copy.deepcopy(unicorn.get_pixels())
+    
+    #modifier is used to increment or decrement the location
+    if direction == "right" or direction == "down":
+      modifier = 1
+    else: 
+      modifier = -1
+    
+    #print("Modifier:",modifier)
+    
+    
+    
+    if direction == "left" or direction == "right":
+      #print ("Direction: ",direction)  
+      
+      for count in range (0,moves):
+        h = h + (modifier)
+        #erase old sprite
+        #print ("Erasing Frame HV:",oldf," ",h,v)
+        setpixels(Buffer)
+
+        if count >= 1:
+          oldh = h - modifier
+          
+        #draw new sprite
+        self.Display(h,v)
+        unicorn.show() 
+        #SendBufferPacket(RemoteDisplay,gv.HatHeight,gv.HatWidth)
+        time.sleep(delay)
+
+      #Check for keyboard input
+      r = random.randint(0,5)
+      if (r == 0):
+        Key = PollKeyboard()
+
+  
+  def FloatAcrossScreen(self,h,v,direction,ScrollSleep):
+    if (direction == "right"):
+      self.Float((0- self.width),v,"right",(gv.HatWidth + self.width),ScrollSleep)
+    elif (direction == "left"):
+      self.Float(gv.HatWidth-1,v,"left",(gv.HatWidth + self.width),ScrollSleep)
+    elif (direction == "up"):
+      self.Float(h,gv.HatWidth-1,"left",(gv.HatWidth + self.height),ScrollSleep)
 
 
 
@@ -922,7 +1001,7 @@ class VirusWorld(object):
     self.Playfield       = [[EmptyObject('EmptyObject') for i in range(self.width)] for i in range(self.height)]
 
   
-    self.walllives       = 20
+    self.walllives       = gv.VirusFoodWallLives
 
 
 
@@ -1000,7 +1079,7 @@ class VirusWorld(object):
           self.Playfield[y][x].direction = PointTowardsObject8Way(x,y,height/2,width/2)
           Viruses.append(self.Playfield[y][x])
         else:
-          #print ("EmptyObject")
+          #print ('EmptyObject')
           self.Playfield[y][x] = EmptyObject('EmptyObject')
       print('')
 
@@ -1024,7 +1103,7 @@ class VirusWorld(object):
         # #print ("DisplayWindow hv HV: ",h,v,H,V) 
         # name = self.Playfield[v+V][h+H].name
         # #print ("Display: ",name,V,H)
-        # if (name == "EmptyObject"):
+        # if (name == 'EmptyObject'):
           # r = 0
           # g = 0
           # b = 0          
@@ -1066,7 +1145,7 @@ class VirusWorld(object):
         #print ("DisplayWindow hv HV: ",h,v,H,V) 
         name = self.Playfield[v+V][h+H].name
         #print ("Display: ",name,V,H)
-        if (name == "EmptyObject"):
+        if (name == 'EmptyObject'):
           r = 0
           g = 0
           b = 0          
@@ -1119,7 +1198,7 @@ class VirusWorld(object):
          
         name = self.Playfield[v+V][h+H].name
         #print ("Display: ",name,V,H)
-        if (name == "EmptyObject"):
+        if (name == 'EmptyObject'):
           r = 0
           g = 0
           b = 0          
@@ -1154,7 +1233,7 @@ class VirusWorld(object):
          
         name = self.Playfield[v+V][h+H].name
         #print ("Display: ",name,V,H)
-        if (name not in ("EmptyObject","Wall","WallBreakable")):
+        if (name not in ('EmptyObject',"Wall","WallBreakable")):
           count = count + 1
     return count;
 
@@ -1178,7 +1257,7 @@ class VirusWorld(object):
          
         name = self.Playfield[V][H].name
         #print ("Display: ",name,V,H)
-        if (name == "EmptyObject"):
+        if (name == 'EmptyObject'):
           print ('  ',end='')
 
         #draw border walls
@@ -1200,7 +1279,10 @@ class VirusWorld(object):
         elif (self.Playfield[V][H].alive == 1):
           print (' .',end='')
         else:
-          print (' *',end='')
+          print (' X',end='')
+          #print ("Name:",name," alive:",self.Playfield[V][H].alive)
+
+          #time.sleep(1)
 
       print('')
 
@@ -1234,11 +1316,12 @@ class Virus(object):
     self.internalcounter = 0                 #used to count moves between mutation affects (i.e. turn left every 3 moves)
     self.replicationrate = replicationrate    
     self.mutationdeathrate = mutationdeathrate
-    self.mutationtypes     = 9
     self.replications      = 0
     self.mutations         = 0
     self.infectionchance   = gv.InfectionChance
     self.chanceofdying     = gv.ChanceOfDying
+    self.eating            = False
+    self.clumping          = True
 
 
   def Display(self):
@@ -1283,6 +1366,7 @@ class Virus(object):
 
   def Mutate(self):
     global MaxMutations
+    global MutationTypes
 
     x              = 0
     #number of possible mutations
@@ -1317,7 +1401,7 @@ class Virus(object):
       self.alive = 0
       self.lives = 0
       self.speed = 999999
-      self.name  = "EmptyObject"
+      self.name  = 'EmptyObject'
       self.r     = 0
       self.g     = 0
       self.b     = 0
@@ -1325,11 +1409,11 @@ class Virus(object):
 
 
       #print ("--Virus mutation!--")
-      mutationtype = random.randint(1,self.mutationtypes)
+      mutationtype = random.randint(1,gv.MutationTypes)
 
       
       #Mutations get a new name and color
-      x = random.randint(1,15)
+      x = random.randint(1,gv.MutationTypes)
       if (x == 1):
         #Big Red
         r = random.randint(gv.MinBright,gv.MaxBright)
@@ -1366,11 +1450,6 @@ class Virus(object):
         g = random.randint(gv.MinBright,gv.MaxBright)
         b = random.randint(gv.MinBright,gv.MaxBright)
 
-      if (x >= 7 and x<= 15):
-        #swamp mix
-        r = random.randint(gv.MinBright,gv.MaxBright)
-        g = random.randint(gv.MinBright,gv.MaxBright)
-        b = random.randint(gv.MinBright,gv.MaxBright)
 
 
     
@@ -1422,9 +1501,10 @@ class Virus(object):
         self.AdjustSpeed(mutationfactor)
         self.AdjustInfectionChance(mutationfactor * -1)
 
-        r = 255
-        g = 255
-        b = 255
+        #swamp mix
+        r = random.randint(gv.MinBright,gv.MaxBright)
+        g = random.randint(gv.MinBright,gv.MaxBright)
+        b = random.randint(gv.MinBright,gv.MaxBright)
 
 
       #slow turn left
@@ -1432,9 +1512,10 @@ class Virus(object):
         mutationfactor = random.randint(gv.SlowTurnMinMoves,gv.SlowTurnMaxMoves)  #higher is slower!
         #print ("Mutation: slow LEFT turn every (",mutationfactor,") moves")
         self.AdjustSpeed(mutationfactor)
-        r = 255
-        g = 255
-        b = 0
+        #swamp mix
+        r = random.randint(gv.MinBright,gv.MaxBright)
+        g = random.randint(gv.MinBright,gv.MaxBright)
+        b = random.randint(gv.MinBright,gv.MaxBright)
 
 
       #slow turn right
@@ -1442,18 +1523,28 @@ class Virus(object):
         mutationfactor = random.randint(gv.SlowTurnMinMoves,gv.SlowTurnMaxMoves)  #higher is slower!
         #print ("Mutation: slow righ turn every (",mutationfactor,") moves")
         self.AdjustSpeed(mutationfactor)
-        r = 255
+        #swamp mix
+        r = random.randint(gv.MinBright,gv.MaxBright)
+        g = random.randint(gv.MinBright,gv.MaxBright)
+        b = random.randint(gv.MinBright,gv.MaxBright)
+
+
+      #Clumping off
+      elif (mutationtype == 10):
+        self.clumping = False
+        self.AdjustSpeed(mutationfactor)
+        #Purple Haze
+        r = random.randint(gv.MinBright,gv.MaxBright)
         g = 0
         b = 255
-
-
 
         
       #Update common properties
       self.r              = r
       self.g              = g
       self.b              = b
-      self.name           = "" + str(self.r) + ' -' + str(self.g)+ ' -' + str(self.b)
+      if (self.name != 'Wall' and self.name != 'WallBreakable'):
+        self.name           = "" + str(self.r) + ' -' + str(self.g)+ ' -' + str(self.b)
       self.mutationtype   = mutationtype
       self.mutationfactor = mutationfactor
       #print ("TheSpeed: ",self.speed)
@@ -1514,6 +1605,186 @@ def VirusWorldScanAround(Virus,Playfield):
 
 
   return ItemList;
+
+
+
+
+def IsThereAVirusNearby(h,v,direction,VirusName,Playfield):
+  # hv represent desired target location
+  # ScanH and ScanV is where we are scanning
+  
+  #print ("== Scan in Front of Virus ==")
+  
+  ScanDirection = direction
+  ScanH         = 0
+  ScanV         = 0
+
+#         7 1 2
+#         6 x 3                              
+#         5 z 4    x = proposed location, z = current location
+  
+
+  #Scan in front
+  ScanH, ScanV = CalculateDotMovement8Way(h,v,ScanDirection)
+  if (Playfield[ScanV][ScanH].name == VirusName):
+    return 1;
+  
+  
+  #Scan front right diagonal
+  ScanDirection = TurnRight8Way(ScanDirection)
+  ScanH, ScanV = CalculateDotMovement8Way(h,v,ScanDirection)
+  if (Playfield[ScanV][ScanH].name == VirusName):
+    return 1;
+  
+  #Scan right 
+  ScanDirection = TurnRight8Way(ScanDirection)
+  ScanH, ScanV = CalculateDotMovement8Way(h,v,ScanDirection)
+  if (Playfield[ScanV][ScanH].name == VirusName):
+    return 1;
+  
+  #Scan behind right diagonal
+  ScanH, ScanV = CalculateDotMovement8Way(h,v,ScanDirection)
+  if (Playfield[ScanV][ScanH].name == VirusName):
+    return 1;
+  
+  #We don't Scan behind because that is where the virus is!
+  ScanDirection = TurnRight8Way(ScanDirection)
+  ScanH, ScanV = CalculateDotMovement8Way(h,v,ScanDirection)
+  #if (Playfield[ScanV][ScanH].name == VirusName):
+  #  return 1;
+
+
+  #Scan behind left diagonal
+  ScanH, ScanV = CalculateDotMovement8Way(h,v,ScanDirection)
+  if (Playfield[ScanV][ScanH].name == VirusName):
+    return 1;
+
+
+  #Scan left
+  ScanDirection = TurnRight8Way(TurnRight8Way(ScanDirection))
+  ScanH, ScanV = CalculateDotMovement8Way(h,v,ScanDirection)
+  if (Playfield[ScanV][ScanH].name == VirusName):
+    return 1;
+
+  #Scan front left diagonal
+  ScanH, ScanV = CalculateDotMovement8Way(h,v,ScanDirection)
+  if (Playfield[ScanV][ScanH].name == VirusName):
+    return 1;
+
+
+
+
+
+def CountNearbyViruses(h,v,direction,VirusName,Playfield):
+  #this function returns the number of viruses nearby with the same name
+  # hv represent current location
+  # ScanH and ScanV is where we are scanning
+  
+  #print ("== Scan in Front of Virus ==")
+  
+  ScanDirection = direction
+  ScanH         = 0
+  ScanV         = 0
+  count         = 0
+  
+
+#         7 1 2
+#         6 x 3                              
+#         5 z 4    x = proposed location, z = current location
+  
+
+  #Scan in front
+  ScanH, ScanV = CalculateDotMovement8Way(h,v,ScanDirection)
+  if (Playfield[ScanV][ScanH].name == VirusName):
+    count = count + 1
+  
+  
+  #Scan front right diagonal
+  ScanDirection = TurnRight8Way(ScanDirection)
+  ScanH, ScanV = CalculateDotMovement8Way(h,v,ScanDirection)
+  if (Playfield[ScanV][ScanH].name == VirusName):
+    count = count + 1
+  
+  #Scan right 
+  ScanDirection = TurnRight8Way(ScanDirection)
+  ScanH, ScanV = CalculateDotMovement8Way(h,v,ScanDirection)
+  if (Playfield[ScanV][ScanH].name == VirusName):
+    count = count + 1
+  
+  #Scan behind right diagonal
+  ScanH, ScanV = CalculateDotMovement8Way(h,v,ScanDirection)
+  if (Playfield[ScanV][ScanH].name == VirusName):
+    count = count + 1
+  
+  #Scan behind
+  ScanDirection = TurnRight8Way(ScanDirection)
+  ScanH, ScanV = CalculateDotMovement8Way(h,v,ScanDirection)
+  if (Playfield[ScanV][ScanH].name == VirusName):
+    count = count + 1
+
+
+  #Scan behind left diagonal
+  ScanH, ScanV = CalculateDotMovement8Way(h,v,ScanDirection)
+  if (Playfield[ScanV][ScanH].name == VirusName):
+    count = count + 1
+
+
+  #Scan left
+  ScanDirection = TurnRight8Way(TurnRight8Way(ScanDirection))
+  ScanH, ScanV = CalculateDotMovement8Way(h,v,ScanDirection)
+  if (Playfield[ScanV][ScanH].name == VirusName):
+    count = count + 1
+
+  #Scan front left diagonal
+  ScanH, ScanV = CalculateDotMovement8Way(h,v,ScanDirection)
+  if (Playfield[ScanV][ScanH].name == VirusName):
+    count = count + 1
+
+  return count;
+
+
+
+def CountVirusesBehind(h,v,direction,VirusName,Playfield):
+  #this function returns the number of viruses behind
+  # hv represent current location
+  # ScanH and ScanV is where we are scanning
+  
+  #print ("== Scan in Front of Virus ==")
+  
+  ScanDirection = direction
+  ScanH         = 0
+  ScanV         = 0
+  count         = 0
+  
+
+#         . . .
+#         . z .                              
+#         1 2 3    z = current location
+  
+
+  #Scan behind left diagonal
+  ScanDirection = TurnLeft8Way(ScanDirection)
+  ScanH, ScanV = CalculateDotMovement8Way(h,v,ScanDirection)
+  ScanDirection = TurnLeft8Way(ScanDirection)
+  ScanH, ScanV = CalculateDotMovement8Way(h,v,ScanDirection)
+  if (Playfield[ScanV][ScanH].name == VirusName):
+    count = count + 1
+  
+  
+  #Scan behind
+  ScanDirection = TurnLeft8Way(ScanDirection)
+  ScanH, ScanV = CalculateDotMovement8Way(h,v,ScanDirection)
+  if (Playfield[ScanV][ScanH].name == VirusName):
+    count = count + 1
+  
+  #Scan behind right diagonal
+  ScanH, ScanV = CalculateDotMovement8Way(h,v,ScanDirection)
+  if (Playfield[ScanV][ScanH].name == VirusName):
+    count = count + 1
+  
+
+  return count;
+
 
 
 
@@ -2772,7 +3043,7 @@ class GameWorld(object):
         
           name = self.Playfield[v+V][h+H].name
           
-          if (name == "EmptyObject"):
+          if (name == 'EmptyObject'):
             r = 0
             g = 0
             b = 0          
@@ -2808,7 +3079,7 @@ class GameWorld(object):
         if (v+V < self.height and h+H < self.height):
           name = self.Playfield[v+V][h+H].name
           
-          if (name != "EmptyObject"):
+          if (name != 'EmptyObject'):
             setpixel(H,V,r,g,b)
             unicorn.show()
             #SendBufferPacket(RemoteDisplay,gv.HatHeight,gv.HatWidth)
@@ -2837,7 +3108,7 @@ class GameWorld(object):
                 
         name = self.Playfield[v+V][h+H].name
         #print ("Display: ",name,V,H)
-        if (name == "EmptyObject"):
+        if (name == 'EmptyObject'):
           r = 0
           g = 0
           b = 0          
@@ -2913,7 +3184,7 @@ class GameWorld(object):
           #print ("RD xy: ",x,y," rgb(",r,g,b,")")
           self.Playfield[y][x] = Wall(x,y,r,g,b,1,1,'Wall')
         else:
-          #print ("EmptyObject")
+          #print ('EmptyObject')
           self.Playfield[y][x] = EmptyObject('EmptyObject')
           
           
@@ -3809,6 +4080,19 @@ DashSprite = Sprite(
 )
 
 
+#$
+DollarSignSprite = Sprite(
+  5,
+  5,
+  RedR,
+  RedG,
+  RedB,
+  [0,1,1,1,0,
+   1,0,1,0,0,
+   0,1,1,0,0,
+   0,0,1,1,0,
+   1,1,1,0,0]
+)
 
 
 
@@ -4542,6 +4826,14 @@ def ShowScrollingBanner2(TheMessage,rgb,ScrollSpeed,v=5):
   TheBanner.b = b 
   TheBanner.ScrollAcrossScreen(gv.HatWidth-1,v,"left",ScrollSpeed)
 
+def ShowFloatingBanner(TheMessage,rgb,ScrollSpeed,v=5):
+  r,g,b = rgb
+  TheMessage = TheMessage.upper()
+  TheBanner = CreateBannerSprite(TheMessage)
+  TheBanner.r = r 
+  TheBanner.g = g 
+  TheBanner.b = b 
+  TheBanner.FloatAcrossScreen(gv.HatWidth-1,v,"left",ScrollSpeed)
 
 
 
@@ -5220,6 +5512,108 @@ def CreateClockSprite(format):
   return ClockSprite 
 
 
+
+
+
+
+def GetEthereumBalance():
+
+  #Use CoinGeckoAPI to check current Ethereum price in currency
+  
+  try:
+    ETHPrice = CoinGeckoAPI().get_price(ids='ethereum', vs_currencies='cad')
+    CurrencyPrice = float(('{}'.format(ETHPrice['ethereum']['cad'])))
+    print ("Etherium price CDN: ", CurrencyPrice)
+
+    #Get current balance
+    url     = "https://mainnet.infura.io/v3/b426370b8d7d4847b57db1b1a8603938"
+    data    = {'jsonrpc':'2.0', 'id':1, 'method':'eth_getBalance', 'params':['0x3D15798193ecdc14217F431FC341fA81C70AAd45', 'latest']}
+    headers = {'Content-type': 'application/json'}
+    r       = requests.post(url, data=json.dumps(data), headers=headers)
+    r_dict  = json.loads(r.text)
+  
+    ETHWalletBalance = float(int(r_dict['result'],0) / 1000000000000000000.0)
+    CashBalance      = str(ETHWalletBalance * CurrencyPrice)
+
+    print ("Ethereum balance:   ",ETHWalletBalance)
+    print ("Cash value:         ",CashBalance," CDN")
+    
+    return CashBalance, CurrencyPrice, ETHWalletBalance
+  
+  except:
+    CurrencyPrice = 0
+    print ("Error occurred while getting ETH information")
+    return 0, 0, 0
+
+
+def CreateCurrencySprite():   
+  
+
+  #Use CoinGeckoAPI to check current Ethereum price in currency
+  print ("Get currency price")
+  ETHPrice = CoinGeckoAPI().get_price(ids='ethereum', vs_currencies='cad')
+  CurrencyPrice = float(('{}'.format(ETHPrice['ethereum']['cad'])))
+  
+  #Get current balance
+  print ("Getting wallet balance")
+  url     = "https://mainnet.infura.io/v3/b426370b8d7d4847b57db1b1a8603938"
+  data    = {'jsonrpc':'2.0', 'id':1, 'method':'eth_getBalance', 'params':['0x3D15798193ecdc14217F431FC341fA81C70AAd45', 'latest']}
+  headers = {'Content-type': 'application/json'}
+  r       = requests.post(url, data=json.dumps(data), headers=headers)
+
+  r_dict  = json.loads(r.text)
+  
+  
+  AccountBalance = str(float(int(r_dict['result'],0) / 1000000000000000000.0) * CurrencyPrice)
+  print ("Balance:",AccountBalance,"CDN")
+
+   
+  #get dollars
+  d1 = int(AccountBalance[0])
+  d2 = int(AccountBalance[1])
+  d3 = int(AccountBalance[2])
+  #get cents
+  c1 = int(AccountBalance[4])
+  c2 = int(AccountBalance[5])
+
+
+  ClockSprite = DigitSpriteList[d1]  
+  ClockSprite = JoinSprite(ClockSprite, DigitSpriteList[d2], 1)
+  ClockSprite = JoinSprite(ClockSprite, DigitSpriteList[d3], 1)
+  ClockSprite = JoinSprite(ClockSprite, DigitSpriteList[c1], 1)
+    
+
+  ClockSprite.r = SDMedRedR
+  ClockSprite.g = SDMedRedG
+  ClockSprite.b = SDMedRedB
+  
+  
+  #add variables to the object (python allows this, very cool!)
+  ClockSprite.h = (gv.HatWidth - ClockSprite.width) // 2
+  ClockSprite.v = -4
+  ClockSprite.rgb = (SDMedGreenR,SDMedGreenG,SDMedGreenB)
+  ClockSprite.AccountBalance = AccountBalance[0:6]
+
+  #used for displaying clock
+  ClockSprite.StartTime = time.time()
+
+  #used for scrolling clock
+  ClockSprite.PauseStartTime = time.time()
+  ClockSprite.IsScrolling     = 0
+  ClockSprite.Delay           = 2
+  ClockSprite.PausePositionV  = 1
+  ClockSprite.PauseTimerOn    = 0
+
+  
+  ClockSprite.on = 1
+  ClockSprite.DirectionIncrement = 1
+
+
+  
+  return ClockSprite 
+
+
+
 def CreateSecondsSprite():   
   
   hhmmss = datetime.now().strftime('%I:%M:%S')
@@ -5443,7 +5837,9 @@ def CreateBannerSprite(TheMessage):
     elif (c == '-'):
       BannerSprite = JoinSprite(BannerSprite, DashSprite,0)
     elif (c == '#'):
-      BannerSprite = JoinSprite(BannerSprite, PoundSignSprite,0)
+      BannerSprite = JoinSprite(BannerSprite, DashSprite,0)
+    elif (c == '$'):
+      BannerSprite = JoinSprite(BannerSprite, DollarSignSprite,0)
     elif (c == '.'):
       BannerSprite = JoinSprite(BannerSprite, PeriodSprite,0)
     elif (c == ':'):
@@ -6431,7 +6827,7 @@ def ScrollScreenScrollBanner(message,r,g,b,direction,speed):
   ScreenCap  = copy.deepcopy(unicorn.get_pixels())
   ScrollScreen('up',ScreenCap,speed)
 
-  af.ShowScrollingBanner(message,r,g,b,speed)
+  ShowScrollingBanner(message,r,g,b,speed)
 
   TheTime.ScrollAcrossScreen(0,1,"right",speed)
   ScrollScreen('down',ScreenCap,speed)
@@ -6491,6 +6887,6 @@ def PointTowardsObject8Way(SourceH,SourceV,TargetH,TargetV):
 def ShowIPAddress():
   IPAddress = str(subprocess.check_output("hostname -I", shell=True)[:-1]);
   print ("-->",IPAddress,"<--")
-  af.ShowScrollingBanner2(IPAddress,(af.HighGreen),gv.ScrollSleep )
-  af.ShowScrollingBanner2(IPAddress,(af.HighGreen),gv.ScrollSleep )
+  ShowScrollingBanner2(IPAddress,(HighGreen),gv.ScrollSleep )
+  ShowScrollingBanner2(IPAddress,(HighGreen),gv.ScrollSleep )
 

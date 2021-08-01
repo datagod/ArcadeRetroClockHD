@@ -38,6 +38,11 @@
 #    - outbreak uses new zoom function at start and stop of levels           --
 #    - tinkered with Orbits getting particles to bounce, remains inactive    --
 #------------------------------------------------------------------------------
+#   Version: 1.02                                                            --
+#   Date:    Aug 1, 2021                                                     --
+#   Changes:                                                                 --
+#    - commented out showing ETH balance                                     --
+#------------------------------------------------------------------------------
 
 
 
@@ -102,12 +107,23 @@ import traceback
 import unicornhathd as unicorn
 
 
+#For displaying crypto currency
+#from pycoingecko import CoinGeckoAPI
+#price = CoinGeckoAPI().get_price(ids='bitcoin', vs_currencies='usd')
+
+
 #For capturing keypresses
 import curses
 
 
 #to help with debugging
 import inspect
+
+
+#JSON
+import requests
+import simplejson as json
+
 
 
 
@@ -2353,7 +2369,7 @@ def MoveDot(Dot):
 
   #This was an accident, but I like it
   #If the worm has a head on collision with the obstacle, it gets stuck and the obstacle
-  #fades, almost as if the worm is eating it.  The worm ends up shorter though!  Weird.
+  #fades, almost as if the worm is ` it.  The worm ends up shorter though!  Weird.
   #print ('ItemList[3]:', ItemList[3])
   if ItemList[3]  == 'obstacle':
     #print ("Obstacle hit!  Draining our power!")
@@ -3539,7 +3555,7 @@ def MovePlayerShip(Ship, Playfield):
 
 
   #if nothing nearby, and near the middle, stop moving
-  if (all("EmptyObject" == Item for Item in ItemList)
+  if (all('EmptyObject' == Item for Item in ItemList)
       and Ship.h >= 6 and Ship.h <= 11):
     if (random.randint (0,2) == 1):
       #print ("MPS - Staying in the middle")
@@ -4303,8 +4319,9 @@ def CreateSpecialArmada(ShowTime=True):
       WordList=("PAC","MAN","1943","USA","CAN","AUS","NZ","UK","XX","RAS","PIE","PI",
                 "IOI",":O:","8:8","123","777","42","888")
       TheMessage = WordList[random.randint(1,len(WordList)-1)]
-      TheTime = af.CreateBannerSprite(TheMessage)
       print ("Armada Message:",TheMessage)
+      TheTime = af.CreateBannerSprite(TheMessage)
+      print ("Armada launched!")
     
     #if the HH has double digits, sprite is too wide.  Trim the left empty columns.
     if (TheTime.width >= 14):
@@ -4992,7 +5009,7 @@ def PlayDotInvaders():
     LevelFinished     = 'N'
     moves             = 1
     PlayerShip.alive  = 1
-    PlayerShip.speed  = 5
+    PlayerShip.speed  = 10
     PlayerShip.h      = 7
     PlayerShip.v      = 15
     PlayerMissile1.speed = 2
@@ -5140,7 +5157,7 @@ def PlayDotInvaders():
         m,r = divmod(moves,PlayerShip.speed)
         if (r == 0):
           DotInvaderMovePlayerShip(PlayerShip,Playfield)
-          i = random.randint(0,2)
+          i = random.randint(0,5)
           if (i >= 0):
             AdjustSpeed(PlayerShip,'fast',1)
           #print ("M - Player moved?")
@@ -6618,7 +6635,7 @@ def DotZerkMoveHuman(Human,Playfield):
   #PrintDoorStatus()
   
   #Scan left, right, behind looking for robots only
-  print("DZMH - Scan Right")
+  #print("DZMH - Scan Right")
   direction =  af.TurnRight(direction)
   ItemList = DotZerkScanStraightLine(h,v,direction,Playfield)
   #print (ItemList)
@@ -6635,7 +6652,7 @@ def DotZerkMoveHuman(Human,Playfield):
   
   #we don't want the human to shoot, turn around, then do this scan and shoot again.
   #Reverse shots only work with Missile1
-  print("DZMH - Scan behind")
+  #print("DZMH - Scan behind")
   direction =  af.TurnRight(direction)
   ItemList = DotZerkScanStraightLine(h,v,direction,Playfield)
   #print (ItemList)
@@ -6650,7 +6667,7 @@ def DotZerkMoveHuman(Human,Playfield):
       #print("DZMH - FireMissile1 alive scandirection exploding",HumanMissile1.alive,HumanMissile1.scandirection,HumanMissile1.exploding)
       DotZerkAdjustSpeed(Human,'up')
 
-  print("DZMH - Scan Left")
+  #print("DZMH - Scan Left")
   direction =  af.TurnRight(direction)
   ItemList = DotZerkScanStraightLine(h,v,direction,Playfield)
   print (ItemList)
@@ -6666,7 +6683,7 @@ def DotZerkMoveHuman(Human,Playfield):
       DotZerkAdjustSpeed(Human,'up')
       
   #Back to original direction (we did a 360)      
-  print("DZMH - Scan in front")
+  #print("DZMH - Scan in front")
   direction =  af.TurnRight(direction)
 
   #Scan all around, make decision, move
@@ -6683,7 +6700,7 @@ def DotZerkMoveHuman(Human,Playfield):
 
   #Prevent collision of Robot and Human
   if (ItemList[3] == 'Robot'):
-    print ("DZMH - Robot detected immediately in front of human")
+    #print ("DZMH - Robot detected immediately in front of human")
     ScanH,ScanV = af.CalculateDotMovement(h,v,direction)
     Playfield[ScanH][ScanV].alive = 0
     Playfield[ScanH][ScanV].exploding = 1
@@ -6711,7 +6728,7 @@ def DotZerkMoveHuman(Human,Playfield):
   
   #Behave differently if all robots are dead
   if (RobotsAlive == 0):
-    print ("DZMH - Robots dead")
+    #print ("DZMH - Robots dead")
     if ((ItemList[1] == 'border' or ItemList[1] == 'Wall' or ItemList[1] == 'RobotMissile' or ItemList[1] == 'HumanMissile')
     and (ItemList[3] == 'border' or ItemList[3] == 'Wall' or ItemList[3] == 'RobotMissile' or ItemList[3] == 'HumanMissile')
     and (ItemList[5] == 'border' or ItemList[5] == 'Wall' or ItemList[5] == 'RobotMissile' or ItemList[5] == 'HumanMissile')):
@@ -6734,7 +6751,7 @@ def DotZerkMoveHuman(Human,Playfield):
     elif ((ItemList[3] == 'border' or ItemList[3] == 'Wall' or ItemList[3] == 'RobotMissile')
       and (ItemList[5] == 'border' or ItemList[5] == 'Wall' or ItemList[5] == 'RobotMissile')
       and (ItemList[1] == 'empty')):
-      print ("Turn left")
+      #print ("Turn left")
       direction = af.TurnLeft(direction)
       Human.h, Human.v =  af.CalculateDotMovement(h,v,direction)
       
@@ -6743,7 +6760,7 @@ def DotZerkMoveHuman(Human,Playfield):
     elif ((ItemList[3] == 'border' or ItemList[3] == 'Wall'  or ItemList[3] == 'RobotMissile' or ItemList[3] == 'HumanMissile')
       and (ItemList[5] == 'empty')
       and (ItemList[1] == 'empty')):
-      print ("DZMH - Middle of the wall, turning left or right")
+      #print ("DZMH - Middle of the wall, turning left or right")
       direction = af.TurnLeftOrRight(direction)
       Human.h, Human.v =  af.CalculateDotMovement(h,v,direction)
       
@@ -6757,10 +6774,10 @@ def DotZerkMoveHuman(Human,Playfield):
       r = random.randint(0,3)
       if (r == 1 or r == 2):
         direction = af.TurnLeftOrRight(direction)
-        print ("Three sides were empty, turning left or right.  New Direction:",direction)
+        #print ("Three sides were empty, turning left or right.  New Direction:",direction)
         Human.h, Human.v =  af.CalculateDotMovement(h,v,direction)
       else:
-        print ("Three sides were empty.  Moving straight")
+        #print ("Three sides were empty.  Moving straight")
         Human.h, Human.v =  af.CalculateDotMovement(h,v,direction)
 
 
@@ -6768,16 +6785,16 @@ def DotZerkMoveHuman(Human,Playfield):
       direction = af.TurnLeft(direction)
       Human.h, Human.v =  af.CalculateDotMovement(h,v,direction)
       ExitingRoom = 1
-      print("Opening Door to left of human")    
+      #print("Opening Door to left of human")    
     elif (ItemList[3] == 'Door'):
       Human.h, Human.v =  af.CalculateDotMovement(h,v,direction)
       ExitingRoom = 1
-      print("Opening Door in front of human")    
+      #print("Opening Door in front of human")    
     elif (ItemList[5] == 'Door'):
       direction =  af.TurnRight(direction)
       Human.h, Human.v =  af.CalculateDotMovement(h,v,direction)
       ExitingRoom = 1
-      print("Opening Door to right of human")    
+      #print("Opening Door to right of human")    
 
 
         
@@ -6787,14 +6804,14 @@ def DotZerkMoveHuman(Human,Playfield):
       and (ItemList[3] == 'empty')
       and (ItemList[5] == 'empty')):
       
-      print ("Travelling along left wall.  Turn right or straight")
+      #print ("Travelling along left wall.  Turn right or straight")
       r = random.randint(0,10)
       if (r == 1 ):
         direction =  af.TurnRight(direction)
-        print ("Turning right direction: ",direction)
+        #print ("Turning right direction: ",direction)
         Human.h, Human.v =  af.CalculateDotMovement(h,v,direction)
       else:
-        print ("Staying straight")
+        #print ("Staying straight")
         Human.h, Human.v =  af.CalculateDotMovement(h,v,direction)
       
 
@@ -6803,14 +6820,14 @@ def DotZerkMoveHuman(Human,Playfield):
       and (ItemList[3] == 'empty')
       and (ItemList[5] != 'empty')):
       
-      print ("Travelling along right wall.  Turn left or straight")
+      #print ("Travelling along right wall.  Turn left or straight")
       r = random.randint(0,10)
       if (r == 1 ):
         direction = af.TurnLeft(direction)
-        print ("Turning left.  direction: ",direction)
+        #print ("Turning left.  direction: ",direction)
         Human.h, Human.v =  af.CalculateDotMovement(h,v,direction)
       else:
-        print ("Staying straight")
+        #print ("Staying straight")
         Human.h, Human.v =  af.CalculateDotMovement(h,v,direction)
       
       
@@ -6821,7 +6838,7 @@ def DotZerkMoveHuman(Human,Playfield):
      
       
     else:
-      print ("Go straight")
+      #print ("Go straight")
       Human.h, Human.v =  af.CalculateDotMovement(h,v,direction)
 
   
@@ -6829,7 +6846,7 @@ def DotZerkMoveHuman(Human,Playfield):
     #print ("DZMH - Robots Alive!")
     #Hit the road if you see a robot
     if ('Robot' in ItemList):
-      print ("DZMH - Robot Detected - Reversing direction")
+      #print ("DZMH - Robot Detected - Reversing direction")
       direction = af.ReverseDirection(direction)
       Human.h, Human.v =  af.CalculateDotMovement(h,v,direction)
       DotZerkAdjustSpeed(Human,'up')
@@ -6838,7 +6855,7 @@ def DotZerkMoveHuman(Human,Playfield):
     elif ((ItemList[1] == 'border' or ItemList[1] == 'Wall' or ItemList[1] == 'RobotMissile'  or ItemList[1] == 'HumanMissile' or ItemList[1] == 'Door')
       and (ItemList[3] == 'border' or ItemList[3] == 'Wall' or ItemList[3] == 'RobotMissile'  or ItemList[3] == 'HumanMissile' or ItemList[3] == 'Door')
       and (ItemList[5] == 'border' or ItemList[5] == 'Wall' or ItemList[5] == 'RobotMissile'  or ItemList[5] == 'HumanMissile' or ItemList[5] == 'Door')):
-      print ("DZMH - blocked on left front and right - Reversing direction")
+      #print ("DZMH - blocked on left front and right - Reversing direction")
       direction = af.ReverseDirection(direction)
       Human.h, Human.v =  af.CalculateDotMovement(h,v,direction)
       DotZerkAdjustSpeed(Human,'down')
@@ -6847,7 +6864,7 @@ def DotZerkMoveHuman(Human,Playfield):
     elif ((ItemList[3] == 'border' or ItemList[3] == 'Wall' or ItemList[3] == 'RobotMissile' or ItemList[3] == 'HumanMissile' or ItemList[3] == 'Door')
       and (ItemList[1] == 'border' or ItemList[1] == 'Wall' or ItemList[1] == 'RobotMissile' or ItemList[1] == 'HumanMissile' or ItemList[1] == 'Door')
       and (ItemList[5] == 'empty')):
-      print ("DZMH - Left Corner - Turn right")
+      #print ("DZMH - Left Corner - Turn right")
       direction =  af.TurnRight(direction)
       Human.h, Human.v =  af.CalculateDotMovement(h,v,direction)
       DotZerkAdjustSpeed(Human,'down')
@@ -6857,7 +6874,7 @@ def DotZerkMoveHuman(Human,Playfield):
     elif ((ItemList[3] == 'border' or ItemList[3] == 'Wall' or ItemList[3] == 'RobotMissile' or ItemList[3] == 'HumanMissile' or ItemList[3] == 'Door')
       and (ItemList[5] == 'border' or ItemList[5] == 'Wall' or ItemList[5] == 'RobotMissile' or ItemList[5] == 'HumanMissile' or ItemList[5] == 'Door')
       and (ItemList[1] == 'empty')):
-      print ("DZMH - Right Corner - Turn left")
+      #print ("DZMH - Right Corner - Turn left")
       direction = af.TurnLeft(direction)
       Human.h, Human.v =  af.CalculateDotMovement(h,v,direction)
       DotZerkAdjustSpeed(Human,'down')
@@ -6867,7 +6884,7 @@ def DotZerkMoveHuman(Human,Playfield):
     elif ((ItemList[3] == 'border' or ItemList[3] == 'Wall'  or ItemList[3] == 'RobotMissile' or ItemList[3] == 'HumanMissile' or ItemList[3] == 'Door')
       and (ItemList[5] == 'empty')
       and (ItemList[1] == 'empty')):
-      print ("DZMH - Middle of the wall, turning left or right")
+      #print ("DZMH - Middle of the wall, turning left or right")
       direction = af.TurnLeftOrRight(direction)
       Human.h, Human.v =  af.CalculateDotMovement(h,v,direction)
       DotZerkAdjustSpeed(Human,'down')
@@ -6878,7 +6895,7 @@ def DotZerkMoveHuman(Human,Playfield):
       and (ItemList[3] == 'border' or ItemList[3] == 'Wall' or ItemList[3] == 'RobotMissile' or ItemList[3] == 'HumanMissile' or ItemList[3] == 'Door')
       and (ItemList[5] == 'empty')):
       
-      print ("DZMH - Empty both sides - Turn left or right")
+      #print ("DZMH - Empty both sides - Turn left or right")
       direction = af.TurnLeftOrRight(direction)
       Human.h, Human.v =  af.CalculateDotMovement(h,v,direction)
       DotZerkAdjustSpeed(Human,'down')
@@ -6893,18 +6910,18 @@ def DotZerkMoveHuman(Human,Playfield):
       
     #Right side empty --  straight
     elif (ItemList[5] == 'empty'):
-      print("DZMH - Right side empty - Go straigt")
+      #print("DZMH - Right side empty - Go straigt")
       Human.h, Human.v =  af.CalculateDotMovement(h,v,direction)
       DotZerkAdjustSpeed(Human,'up')
     
     elif (ItemList[1] == 'empty' and (ItemList[5] == 'Wall' or ItemList[5] == 'RobotMissile' or ItemList[5] == 'HumanMissile' or ItemList[5] == 'Door')):
-      print ("DZMH - Left is empty, right is blocked - turn left")
+      #print ("DZMH - Left is empty, right is blocked - turn left")
       direction = af.TurnLeft(direction)
       Human.h, Human.v =  af.CalculateDotMovement(h,v,direction)
 
       
     else:
-      print ("DZMH - Give up - Go straight")
+      #print ("DZMH - Give up - Go straight")
       Human.h, Human.v =  af.CalculateDotMovement(h,v,direction)
       DotZerkAdjustSpeed(Human,'up')
 
@@ -6932,53 +6949,53 @@ def DotZerkMoveHuman(Human,Playfield):
       direction = af.ReverseDirection(Human.direction)
       Human.h, Human.v =  af.CalculateDotMovement(h,v,direction)
       
-      print("Stuck at door1. new direction:",direction)
+      #print("Stuck at door1. new direction:",direction)
   if (Human.h >= 15 and Human.v == 7):
     if (Door2.locked == 1):
       Human.h = 14
       direction = af.ReverseDirection(Human.direction)
       Human.h, Human.v =  af.CalculateDotMovement(h,v,direction)
-      print("Stuck at door2. new direction:",direction)
+      #print("Stuck at door2. new direction:",direction)
   if (Human.h == 7 and Human.v >= 15):
     if (Door3.locked == 1):
       Human.v = 14
       direction = af.ReverseDirection(Human.direction)
       Human.h, Human.v =  af.CalculateDotMovement(h,v,direction)
-      print("Stuck at door3. new direction:",direction)
+      #print("Stuck at door3. new direction:",direction)
   if (Human.h <= 0 and Human.v == 7):
     if (Door4.locked == 1):
       Human.h = 1
       direction = af.ReverseDirection(direction)
       Human.h, Human.v =  af.CalculateDotMovement(h,v,direction)
-      print("Stuck at door4. new direction:",Human.direction)
+      #print("Stuck at door4. new direction:",Human.direction)
     
       
 
   Human.direction = direction
   Human.scandirection = direction      
-  print ("DZMH - HumanDirection:",Human.direction)
+  #print ("DZMH - HumanDirection:",Human.direction)
 
   
   
-  print("DZMH - Old hv: ",h,v, " New hv: ",Human.h,Human.v, "direction: ",Human.direction)
+  #print("DZMH - Old hv: ",h,v, " New hv: ",Human.h,Human.v, "direction: ",Human.direction)
   if (Human.h == h and Human.v == v):
-    print ("Something is not right.  Human didn't move, forcing a move now...RobotsAlive:",RobotsAlive)
+    #print ("Something is not right.  Human didn't move, forcing a move now...RobotsAlive:",RobotsAlive)
     Human.direction = af.TurnLeftOrRight(direction)
     Human.scandirection = Human.direction
     Human.h, Human.v = af.CalculateDotMovement(Human.h,Human.v,direction)
 
     #Don't let human hit outside walls (put this in its own function and remove duplication)
     if (Human.h == 15 and Human.v != 7):
-      print ("Hit a wall!")
+      #print ("Hit a wall!")
       Human.h = 14
     if (Human.h == 0 and Human.v != 7):
-      print ("Hit a wall!")
+      #print ("Hit a wall!")
       Human.h = 1
     if (Human.v == 15 and Human.h != 7):
-      print ("Hit a wall!")
+      #print ("Hit a wall!")
       Human.v = 14
     if (Human.v == 0 and Human.h != 7):
-      print ("Hit a wall!")
+      #print ("Hit a wall!")
       Human.v = 1
   
 
@@ -8160,7 +8177,6 @@ def ScrollScreenShowClock(direction,speed):
   af.ScrollScreen('down',ScreenCap,0.01)
 
 
-
       
 def ActivateClockMode(ClockOnDuration):
   #This method is the simplest
@@ -8188,17 +8204,23 @@ def ActivateClockMode(ClockOnDuration):
 
   print ("ACM - Started1")
 
+  #Get EtheriumBalance in CDN funds
+  #CashBalance, CurrencyPrice, ETHWalletBalance = af.GetEthereumBalance()
+
+
 
   #Display Day of Week
   while ((CheckTimer(StartClockTime, ClockOnDuration) != 1) and (done == 0)):
     
     DOW = af.CreateDayOfWeekSprite()
+
     
     
     #If the time has changed, draw a new time
     mm = datetime.now().strftime('%M')
     if (mm != Oldmm):
       #Erase old time
+      Oldmm = mm
       TheTime.EraseNoShow(TheTime.h,TheTime.v)
 
 
@@ -8225,11 +8247,12 @@ def ActivateClockMode(ClockOnDuration):
     
     time.sleep(0.5)    
 
-    if (CheckTimer(DisplayTime,5) == 1):
+    if (CheckTimer(DisplayTime,10) == 1):
       #Reset timer 
       DisplayTime = time.time()
       DOW.CopySpriteToBuffer(DOW.h,6)
       ShowRandomAnimation()
+      #af.ShowFloatingBanner("ETH $"     + str(CashBalance)[0:7] + " CDN" ,(255,0,0),gv.ScrollSleep * 1.5,10)
       time.sleep(0.5)    
 
     else:  
@@ -8270,45 +8293,134 @@ def ActivateClockMode(ClockOnDuration):
   
   
   
-  # Display Seconds
-  # while (CheckTimer(StartClockTime, ClockOnDuration) != 1):
-    
-    # SS = CreateSecondsSprite()
-    
-    # #If the time has changed, draw a new time
-    # mm = datetime.now().strftime('%M')
-    # if (mm != Oldmm):
-      # TheTime = af.CreateClockSprite(12)
-      # TheTime.r = af.SDLowGreenR
-      # TheTime.g = af.SDLowGreenG
-      # TheTime.b = af.SDLowGreenB
 
-      # #if the HH has double digits, sprite is too wide.  Trim the left empty columns.
-      # if (TheTime.width >= 14):
-        # TheTime = LeftTrimSprite(TheTime,1)
 
-      # TheTime.h = 7 - (TheTime.width / 2)
-      # TheTime.v = 0
+
+
+
+def ActivateCurrencyMode(CurrencyOnDuration):
+
+  #If we don't do a deep copy, ScreenCap ends up simply pointing to the Buffer 
+  #and gets modified by scrolling functions!
+  ScreenCap  = copy.deepcopy(unicorn.get_pixels())
+  af.ScrollScreen('up',ScreenCap,0.01)
+  unicorn.off()
+
+  #Start a timer
+  StartClockTime = time.time()
+  DisplayTime = time.time()
+  TheTime = af.CreateCurrencySprite()
+  TheTime.r = af.SDLowGreenR
+  TheTime.g = af.SDLowGreenG
+  TheTime.b = af.SDLowGreenB
+
+  
+  Oldmm = 0
+  done  = 0
+  ShownOnce = 0
+
+
+  print ("ACM - Started1")
+
+  
+
+  #Secondary Message
+  while ((CheckTimer(StartClockTime, CurrencyOnDuration) != 1) and (done == 0)):
+    
+    #DOW = af.CreateDayOfWeekSprite()
+    DOW = af.CreateBannerSprite('ETH')
+   
+    DOW.r = af.SDMedOrangeR
+    DOW.g = af.SDMedOrangeG
+    DOW.b = af.SDMedOrangeB
+    DOW.h = ((gv.HatWidth - DOW.width) // 2) -1
+    DOW.v = 5
+    DOW.rgb = (af.SDMedGreenR,af.SDMedGreenG,af.SDMedGreenB)
+  
+
+    
+    #get new price
+    mm = datetime.now().strftime('%M')
+    
+
+    if (mm != Oldmm):
+      #Erase old time
+      Oldmm = mm
+      TheTime.EraseNoShow(TheTime.h,TheTime.v)
+
+      print("Get new cryptocurrency price")
+      TheTime = af.CreateCurrencySprite()
+      TheTime.r = af.SDMedGreenR
+      TheTime.g = af.SDMedGreenG
+      TheTime.b = af.SDMedGreenB
+
+      #if the HH has double digits, sprite is too wide.  Trim the left empty columns.
+      #if (TheTime.width >= 14):
+      #  TheTime = af.LeftTrimSprite(TheTime,1)
+
+      TheTime.h = 7 - (TheTime.width / 2)
+      TheTime.v = 0
       
+      if (TheTime.h < 0):
+        TheTime.h = 0
     
-      # #Display Time
-      # TheTime.EraseNoShow(TheTime.h,TheTime.v)
-      # TheTime.CopySpriteToBuffer(TheTime.h,TheTime.v)
-      # #Oldmm = mm
-    
+      #Display New Time
+      TheTime.CopySpriteToBuffer(TheTime.h,TheTime.v)
+      
 
-    # if (CheckTimer(DisplayTime,5) == 1):
-      # #Reset timer 
-      # DisplayTime = time.time()
-      # SS.CopySpriteToBuffer(SS.h,7)
-      # ShowRandomAnimation()
-    # else:  
-      # #Display the seconds
-      # SS.CopySpriteToBuffer(SS.h,7)
 
-    # unicorn.show()
-    # time.sleep(1)
     
+    time.sleep(0.5)    
+
+    if (CheckTimer(DisplayTime,5) == 1):
+      #Reset timer 
+      DisplayTime = time.time()
+      DOW.CopySpriteToBuffer(DOW.h,6)
+      ShowRandomAnimation()
+
+
+      af.ShowFloatingBanner("$" + TheTime.AccountBalance + " CDN",(220,220,0),gv.ScrollSleep * 1.5,10)
+      #need to convert this to a animated color sprite so it can float across the screen, or add the function to Sprite
+      time.sleep(0.5)    
+
+    else:  
+      #Display the DOW (day of week)
+      DOW.CopySpriteToBuffer(DOW.h,6)
+
+    time.sleep(0.5)    
+
+    #Zoom in to the time, but only once
+    if (ShownOnce == 0):
+      print ("ShownOnce:",ShownOnce)
+      ScreenCap  = copy.deepcopy(unicorn.get_pixels())
+      unicorn.clear()
+      af.ZoomScreen(ScreenCap,2,17,0.025)
+      ShownOnce = 1
+
+    #SendBufferPacket(RemoteDisplay,gv.HatHeight,gv.HatWidth)
+
+
+    #Check for keyboard input
+    Key = af.PollKeyboard()
+    if (Key == 'q'):
+      ClockOnDuration = 0
+      done = 1
+      print ("Trying to quit!")
+    
+    
+    unicorn.show()
+    print (datetime.now())
+    time.sleep(1)
+
+
+  #Zoom Clock at end
+  ScreenCap  = copy.deepcopy(unicorn.get_pixels())
+  af.ZoomScreen(ScreenCap,16,2,0.025)
+
+
+  
+  
+  
 
 
 
@@ -9714,42 +9826,42 @@ def MoveCar(Car,Playfield):
       #print ("--Wall found--")
       
       #When you hit the middle of a wall, go left or right (randomly)
-      if (ItemList[3] == "EmptyObject" and ItemList[7] == "EmptyObject"):
+      if (ItemList[3] == 'EmptyObject' and ItemList[7] == 'EmptyObject'):
         Car.direction = af.TurnLeftOrRightTwice8Way(Car.direction)
       
       #If you are surrounded, turn around
       elif (ItemList[3] == "Wall" and ItemList[7] == "Wall"):
         Car.direction = af.ReverseDirection8Way(Car.direction)
       
-      elif (ItemList[8] == "EmptyObject"):
+      elif (ItemList[8] == 'EmptyObject'):
         Car.direction = af.TurnLeft8Way(Car.direction)
-      elif (ItemList[7] in ("EmptyObject","Fuel")):
+      elif (ItemList[7] in ('EmptyObject',"Fuel")):
         Car.direction = af.TurnLeft8Way(Car.direction)
         Car.direction = af.TurnLeft8Way(Car.direction)
-      elif (ItemList[2] == "EmptyObject"):
+      elif (ItemList[2] == 'EmptyObject'):
         Car.direction = af.TurnRight8Way(Car.direction)
-      elif (ItemList[3] in ("EmptyObject","Fuel")):
+      elif (ItemList[3] in ('EmptyObject',"Fuel")):
         Car.direction = af.TurnRight8Way(Car.direction)
         Car.direction = af.TurnRight8Way(Car.direction)
     
     elif (ItemList[1] == "Enemy"):
-      if (ItemList[2] != "EmptyObject" and ItemList[8] != "EmptyObject" and ItemList[5] == "EmptyObject"):
+      if (ItemList[2] != 'EmptyObject' and ItemList[8] != 'EmptyObject' and ItemList[5] == 'EmptyObject'):
         Car.direction = af.ReverseDirection8Way(Car.direction)
-      elif (ItemList[2] == "EmptyObject"):
+      elif (ItemList[2] == 'EmptyObject'):
         Car.direction = af.TurnRight8Way(Car.direction)    
-      elif (ItemList[3] == "EmptyObject"):
-        Car.direction = af.TurnRight8Way(Car.direction)    
-        Car.direction = af.TurnRight8Way(Car.direction)    
-      elif (ItemList[4] == "EmptyObject"):
+      elif (ItemList[3] == 'EmptyObject'):
         Car.direction = af.TurnRight8Way(Car.direction)    
         Car.direction = af.TurnRight8Way(Car.direction)    
+      elif (ItemList[4] == 'EmptyObject'):
         Car.direction = af.TurnRight8Way(Car.direction)    
-      elif (ItemList[8] == "EmptyObject"):
+        Car.direction = af.TurnRight8Way(Car.direction)    
+        Car.direction = af.TurnRight8Way(Car.direction)    
+      elif (ItemList[8] == 'EmptyObject'):
         Car.direction = af.TurnLeft8Way(Car.direction)    
-      elif (ItemList[7] == "EmptyObject"):
+      elif (ItemList[7] == 'EmptyObject'):
         Car.direction = af.TurnLeft8Way(Car.direction)    
         Car.direction = af.TurnLeft8Way(Car.direction)    
-      elif (ItemList[6] == "EmptyObject"):
+      elif (ItemList[6] == 'EmptyObject'):
         Car.direction = af.TurnLeft8Way(Car.direction)    
         Car.direction = af.TurnLeft8Way(Car.direction)    
         Car.direction = af.TurnLeft8Way(Car.direction)    
@@ -9782,7 +9894,7 @@ def MoveCar(Car,Playfield):
 
       Fuelh, Fuelv = af.CalculateDotMovement8Way(h,v,Car.direction)
       Playfield[Fuelv][Fuelh].alive = 0
-      Playfield[Fuelv][Fuelh] = af.EmptyObject("EmptyObject")
+      Playfield[Fuelv][Fuelh] = af.EmptyObject('EmptyObject')
       Car.destination = ""
       Car.lives = Car.lives + 50
       
@@ -9790,16 +9902,16 @@ def MoveCar(Car,Playfield):
       Car.ShiftGear("up")
     
     #Turn if following a wall and a corridor opens up
-    elif(ItemList[7] == "Wall" and ItemList[8] == "EmptyObject"):
+    elif(ItemList[7] == "Wall" and ItemList[8] == 'EmptyObject'):
       Car.direction = af.ChanceOfTurning8Way(Car.direction,50)
-    elif(ItemList[3] == "Wall" and ItemList[2] == "EmptyObject"):
+    elif(ItemList[3] == "Wall" and ItemList[2] == 'EmptyObject'):
       Car.direction = af.ChanceOfTurning8Way(Car.direction,50)
 
 
       
   #Only move if the space decided upon is actually empty!
   ScanH,ScanV = af.CalculateDotMovement8Way(h,v,Car.direction)
-  if (Playfield[ScanV][ScanH].name == "EmptyObject"):
+  if (Playfield[ScanV][ScanH].name == 'EmptyObject'):
     h = ScanH
     v = ScanV
 
@@ -9811,7 +9923,7 @@ def MoveCar(Car,Playfield):
     Car.h = h
     Car.v = v  
     Playfield[v][h] = Car
-    Playfield[oldv][oldh] = af.EmptyObject("EmptyObject")
+    Playfield[oldv][oldh] = af.EmptyObject('EmptyObject')
 
 
     
@@ -9850,7 +9962,7 @@ def CopyFuelDotsToPlayfield(FuelDots,FuelCount,RaceWorld):
       #print ("Playfield name: ",name)
       
       #print ("FuelDot x h v: ",x,h,v)
-      if (name == "EmptyObject"):
+      if (name == 'EmptyObject'):
         #print ("Placing Fuel x name: ",x,FuelDots[x].name)
         RaceWorld.Playfield[v][h] = FuelDots[x]
         FuelDots[x].h = h
@@ -9875,7 +9987,7 @@ def CopyEnemyCarsToPlayfield(EnemyCars,EnemyCount,RaceWorld):
       #print ("Playfield name: ",name)
       
       #print ("FuelDot x h v: ",x,h,v)
-      if (name == "EmptyObject"):
+      if (name == 'EmptyObject'):
         #print ("Placing car x name: ",x,EnemyCars[x].name)
         RaceWorld.Playfield[v][h] = EnemyCars[x]
         EnemyCars[x].h = h
@@ -10021,7 +10133,7 @@ def TurnTowardsCar(SourceCar,TargetCar):
 def TurnTowardsFuelIfThereIsRoom(Car,Playfield,FuelDots,ClosestFuel):
   ItemList = []
   ItemList = RallyDotScanAroundCar(Car,Playfield)          
-  if (all("EmptyObject" == Item for Item in ItemList)):
+  if (all('EmptyObject' == Item for Item in ItemList)):
     #print ("Scanners indicate emptiness all around")
     TurnTowardsCar(Car,FuelDots[ClosestFuel])
     #Car.ShiftGear("up")
@@ -11373,7 +11485,7 @@ def PlayPacDot(NumDots):
 
 
 #--------------------------------------
-# VirusWorld                         --
+# VirusWorld  / OUTBREAK             --
 #--------------------------------------
 
 # Ideas:
@@ -11384,7 +11496,7 @@ def PlayPacDot(NumDots):
 # - need a new object virus dot
 # - when a virus conquers an area, remove part of the wall and scroll to the next area
 # - areas may have dormant viruses that are only acivated once in a while
-# - 
+# - virus will slow down to eat
 
 
   
@@ -11393,6 +11505,7 @@ def SpreadInfection(Virus1,Virus2,direction):
   global ClumpingSpeed
   global ChanceOfSpeedup
   global InfectionChance
+  global OriginalReplicationRate
 
   #print ("Spread Infection: ",Virus1.name, Virus2.name)
   
@@ -11400,9 +11513,33 @@ def SpreadInfection(Virus1,Virus2,direction):
   if (Virus2.name == "WallBreakable"):
     #print ("Wallbreakable is immune from infections but does sustain damage",Virus2.lives)
     Virus2.lives = Virus2.lives -1
+   
+    
+    #Trying something new here.  When the virus is eating, we still want it to be active (speed) but just not moving
+    #until the food is gone
+    Virus1.eating = True
+    Virus1.clumping = True
+    Virus1.AdjustSpeed(-4)
+    Virus1.replicationrate   = Virus1.replicationrate // 2   #floor division
+    Virus1.mutationdeathrate = Virus1.mutationdeathrate + 1
+   
+
+
+
     if (Virus2.lives <= 0):
       Virus2 = af.EmptyObject
       Virus2.alive = 0
+      #when virus finishes eating, it speeds up
+      #Virus1.AdjustSpeed(-3)
+      #if (Virus1.speed <= 1):
+      #  Virus1.speed = 1
+      
+      #Done Eating?  Go faster little fella!
+      Virus1.eating = False
+      Virus1.AdjustInfectionChance(-1)
+      Virus1.AdjustSpeed(-3)
+      Virus1.replicationrate = gv.OriginalReplicationRate
+
 
   else:
 
@@ -11454,25 +11591,25 @@ def ReplicateVirus(Virus,DinnerPlate):
   if(VirusCopy.replications >= gv.MaxReplications):
       VirusCopy.lives = 0
       VirusCopy.alive = 0
-      VirusCopy       = af.EmptyObject("EmptyObject")
+      VirusCopy       = af.EmptyObject('EmptyObject')
       Virus.lives     = 0
       Virus.alive     = 0
-      Virus           = af.EmptyObject("EmptyObject")
-      DinnerPlate.Playfield[h][v] = af.EmptyObject("EmptyObject")
+      Virus           = af.EmptyObject('EmptyObject')
+      DinnerPlate.Playfield[h][v] = af.EmptyObject('EmptyObject')
 
       #print("Virus replication limit met.  Virus died.")
 
 
   else:
     
-    if (ItemList[5] == "EmptyObject" or ItemList[6] == "EmptyObject"):
+    if (ItemList[5] == 'EmptyObject' or ItemList[6] == 'EmptyObject'):
     
-      if (ItemList[5] == "EmptyObject"):
+      if (ItemList[5] == 'EmptyObject'):
         #print ("Open space to the left")
         scandirection  = af.TurnLeft8Way(af.TurnLeft8Way(direction))
         #print ("direction scandirection",direction,scandirection)
 
-      elif (ItemList[6] == "EmptyObject"):
+      elif (ItemList[6] == 'EmptyObject'):
         #print ("Open space to the right")
         scandirection = af.TurnRight8Way(af.TurnRight8Way(direction))
 
@@ -11492,6 +11629,8 @@ def ReplicateVirus(Virus,DinnerPlate):
 
 def MoveVirus(Virus,Playfield):
   global VirusMoves
+  global ChanceOfTurningIntoFood
+
   #print ("== MoveVirus : ",Virus.name," hv dh dv alive--",Virus.h,Virus.v,Virus.dh,Virus.dv,Virus.alive)
   
   #print ("")
@@ -11504,11 +11643,11 @@ def MoveVirus(Virus,Playfield):
   ItemList = []
   DoNothing = ""
   ScanDirection = 1
-  WallInFront    = af.EmptyObject("EmptyObject")
-  VirusInFront   = af.EmptyObject("EmptyObject")
-  VirusInRear    = af.EmptyObject("EmptyObject")
-  VirusLeftDiag  = af.EmptyObject("EmptyObject")
-  VirusRightDiag = af.EmptyObject("EmptyObject")
+  WallInFront    = af.EmptyObject('EmptyObject')
+  VirusInFront   = af.EmptyObject('EmptyObject')
+  VirusInRear    = af.EmptyObject('EmptyObject')
+  VirusLeftDiag  = af.EmptyObject('EmptyObject')
+  VirusRightDiag = af.EmptyObject('EmptyObject')
   
   #Infection / mutation modiefers
   #We need a random chance of mutation
@@ -11535,34 +11674,34 @@ def MoveVirus(Virus,Playfield):
 
   #Grab potential viruses in scan zones NW N NE S
   #Grab Virus in front
-  if (ItemList[1] != "Wall" and ItemList[1] != "WallBreakable" and ItemList[1] != "EmptyObject"):
+  if (ItemList[1] != "Wall" and ItemList[1] != "WallBreakable" and ItemList[1] != 'EmptyObject'):
     ScanH,ScanV = af.CalculateDotMovement8Way(h,v,Virus.direction)
     VirusInFront = Playfield[ScanV][ScanH]
     #print ("ScanFront    ",VirusInFront.name,VirusLeftDiag.name,VirusRightDiag.name,VirusInRear.name)
 
   #Grab Virus left diagonal
-  if (ItemList[2] != "Wall" and ItemList[1] != "WallBreakable" and ItemList[2] != "EmptyObject"):
+  if (ItemList[2] != "Wall" and ItemList[1] != "WallBreakable" and ItemList[2] != 'EmptyObject'):
     ScanDirection = af.TurnLeft8Way(Virus.direction)
     ScanH,ScanV = af.CalculateDotMovement8Way(h,v,ScanDirection)
     VirusLeftDiag = Playfield[ScanV][ScanH]
     #print ("ScanLeftDiag ",VirusInFront.name,VirusLeftDiag.name,VirusRightDiag.name,VirusInRear.name)
 
   #Grab Virus right diagonal
-  if (ItemList[3] != "Wall" and ItemList[1] != "WallBreakable" and ItemList[3] != "EmptyObject"):
+  if (ItemList[3] != "Wall" and ItemList[1] != "WallBreakable" and ItemList[3] != 'EmptyObject'):
     ScanDirection = af.TurnRight8Way(Virus.direction)
     ScanH,ScanV = af.CalculateDotMovement8Way(h,v,ScanDirection)
     VirusRightDiag = Playfield[ScanV][ScanH]
     #print ("ScanRightDiag",VirusInFront.name,VirusLeftDiag.name,VirusRightDiag.name,VirusInRear.name)
   
         
-  if (ItemList[4] != "Wall" and ItemList[1] != "WallBreakable" and ItemList[4] != "EmptyObject"):
+  if (ItemList[4] != "Wall" and ItemList[1] != "WallBreakable" and ItemList[4] != 'EmptyObject'):
     ScanDirection = af.ReverseDirection8Way(Virus.direction)
     ScanH,ScanV   = af.CalculateDotMovement8Way(h,v,ScanDirection)
     VirusInRear     = Playfield[ScanV][ScanH]
     #print ("ScanRear",VirusInFront.name,VirusLeftDiag.name,VirusRightDiag.name,VirusInRear.name)
   
 
-  #Infect Viruss
+  #Infect Virus
   #If different virus, take it over (test for chance)
   #else follow it
 
@@ -11572,31 +11711,31 @@ def MoveVirus(Virus,Playfield):
     #print ("Wall in front: ",WallInFront.name, WallInFront.lives)
     WallInFront.lives = WallInFront.lives -1
     if (WallInFront.lives <= 0):
-      Playfield[WallInFront.v][WallInFront.h] = af.EmptyObject("EmptyObject")
+      Playfield[WallInFront.v][WallInFront.h] = af.EmptyObject('EmptyObject')
 
 
   #print ("Thing in front:",VirusInFront.name, WallInFront.name)
         
   #Check front Virus
-  if (VirusInFront.name != "EmptyObject"):
+  if (VirusInFront.name != 'EmptyObject'):
     if (VirusInFront.name != Virus.name):
       SpreadInfection(Virus,VirusInFront,Virus.direction)
       #VirusInFront.AdjustSpeed(InfectionSpeedModifier)
 
   #Check left diagonal Virus
-  if (VirusLeftDiag.name != "EmptyObject"):
+  if (VirusLeftDiag.name != 'EmptyObject'):
     if (VirusLeftDiag.name != Virus.name):
       SpreadInfection(Virus,VirusLeftDiag,(af.TurnLeft8Way(Virus.direction)))
 
 
   #Check right diagonal Virus
-  if (VirusRightDiag.name != "EmptyObject"):
+  if (VirusRightDiag.name != 'EmptyObject'):
     if (VirusRightDiag.name != Virus.name):
       SpreadInfection(Virus,VirusRightDiag,(af.TurnRight8Way(Virus.direction)))
 
 
   #Check rear Virus
-  if (VirusInRear.name != "EmptyObject"):
+  if (VirusInRear.name != 'EmptyObject'):
     #If different virus, take it over 
     #make it follow
     if (VirusInRear.name != Virus.name):
@@ -11615,7 +11754,7 @@ def MoveVirus(Virus,Playfield):
 
 
   #If no viruses around, increase speed and wander around
-  if (all("EmptyObject" == Item for Item in ItemList)):
+  if (all('EmptyObject' == Item for Item in ItemList)):
     if (random.randint(1,gv.ChanceOfSpeedup) == 1):
       Virus.AdjustSpeed(-1)
   
@@ -11624,24 +11763,25 @@ def MoveVirus(Virus,Playfield):
 
   
   #If no viruses around, check for walls
-  if (all("EmptyObject" == name for name in (VirusInFront.name, VirusLeftDiag.name, VirusRightDiag.name, VirusInRear.name))):
+  if (all('EmptyObject' == name for name in (VirusInFront.name, VirusLeftDiag.name, VirusRightDiag.name, VirusInRear.name))):
     
 
     if (ItemList[1] == "WallBreakable"):
       Virus.direction = af.TurnLeftOrRight8Way(Virus.direction)
 
+
     elif((ItemList[1] == "Wall" or ItemList[1] == "WallBreakable") 
-      and ItemList[2] == "EmptyObject" 
-      and ItemList[3] == "EmptyObject"):
+      and ItemList[2] == 'EmptyObject' 
+      and ItemList[3] == 'EmptyObject'):
       Virus.direction = af.TurnLeftOrRight8Way(Virus.direction)
 
     elif((ItemList[1] == "Wall" or ItemList[1] == "WallBreakable") 
       and(ItemList[2] == "Wall" or ItemList[2] == "WallBreakable") 
-      and ItemList[3] == "EmptyObject"):
+      and ItemList[3] == 'EmptyObject'):
       Virus.direction = af.TurnRight8Way(Virus.direction)
 
     elif((ItemList[1] == "Wall" or ItemList[1] == "WallBreakable")
-      and ItemList[2] == "EmptyObject" 
+      and ItemList[2] == 'EmptyObject' 
       and(ItemList[3] == "Wall" or ItemList[3] == "WallBreakable")):
       Virus.direction = af.TurnLeft8Way(Virus.direction)
 
@@ -11666,7 +11806,18 @@ def MoveVirus(Virus,Playfield):
       Virus.speed = 1
       Virus.mutationtype   = 0
       Virus.mutationfactor = 0
-      Playfield[Virus.v][Virus.h] = af.EmptyObject("EmptyObject")
+      Playfield[Virus.v][Virus.h] = af.EmptyObject('EmptyObject')
+
+
+    #If after a mutation the virus dies, there is a small chance to turn into food or a wall
+    if (random.randint(0,gv.ChanceOfTurningIntoFood) == 1):
+      Playfield[Virus.v][Virus.h] = af.Wall(Virus.h,Virus.v,af.SDDarkWhiteR,af.SDDarkWhiteG,(af.SDDarkWhiteB + 60),1,gv.VirusFoodWallLives,'WallBreakable')
+    elif (random.randint(0,gv.ChanceOfTurningIntoWall) == 1):
+      Playfield[Virus.v][Virus.h] = af.Wall(Virus.h,Virus.v,af.SDDarkWhiteR,af.SDDarkWhiteG,af.SDDarkWhiteB,1,gv.VirusFoodWallLives,'Wall')
+    else:
+      Playfield[Virus.v][Virus.h] = af.EmptyObject('EmptyObject')
+
+
 
 
   #apply directional mutations
@@ -11723,21 +11874,39 @@ def MoveVirus(Virus,Playfield):
             # #print ("VM - slowturning right",Virus.mutationfactor)
             # Virus.direction = af.TurnRight8Way(Virus.direction)
 
-  if (Virus.alive == 1):  
+  if (Virus.alive == 1 and Virus.eating == False):  
     
 
     #Only move if the space decided upon is actually empty!
     ScanH,ScanV = af.CalculateDotMovement8Way(h,v,Virus.direction)
-    if (Playfield[ScanV][ScanH].name == "EmptyObject"):
+    if (Playfield[ScanV][ScanH].name == 'EmptyObject'):
       #print ("Spot moving to is empty ScanV ScanH",ScanV,ScanH)
       #print ("Virus moved!!!!!!!!!!!!!")
-      Virus.h = ScanH
-      Virus.v = ScanV
+      
 
-      #print ("Making Empty oldv oldh vh ",oldv,oldh,v,h)
-      Playfield[ScanV][ScanH] = Virus
-      Playfield[oldv][oldh] = af.EmptyObject("EmptyObject")
-      #print ("Old spot:",Playfield[oldv][oldh].name)
+      #If virus is in clumping mode, only move if the target space is bordering on a virus of the same name
+      #If clumping mode but no nearby viruses, let the little fella keep going
+      if (Virus.clumping == True):
+        if (af.IsThereAVirusNearby(ScanH, ScanV, Virus.direction,Virus.name,Playfield) == 1):
+          Virus.h = ScanH
+          Virus.v = ScanV
+          Playfield[ScanV][ScanH] = Virus
+          Playfield[oldv][oldh] = af.EmptyObject('EmptyObject')
+
+        elif(af.CountVirusesBehind(Virus.h, Virus.v, Virus.direction,Virus.name,Playfield) == 0):
+          Virus.h = ScanH
+          Virus.v = ScanV
+          Playfield[ScanV][ScanH] = Virus
+          Playfield[oldv][oldh] = af.EmptyObject('EmptyObject')
+
+      else:
+        Virus.h = ScanH
+        Virus.v = ScanV
+        Playfield[ScanV][ScanH] = Virus
+        Playfield[oldv][oldh] = af.EmptyObject('EmptyObject')
+
+
+
     else:
       #print ("spot moving to is not empty: ",Playfield[ScanV][ScanH].name, ScanV,ScanH)
       #Introduce some instability into the virus
@@ -12851,11 +13020,11 @@ def CreateDinnerPlate(MapLevel):
     
     #                                     |                    |  |                    |
     DinnerPlate.Map[0]  = ([  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ])
-    DinnerPlate.Map[1]  = ([  1, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 1 ])
-    DinnerPlate.Map[2]  = ([  1, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 1 ])
-    DinnerPlate.Map[3]  = ([  1, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 1 ])
-    DinnerPlate.Map[4]  = ([  1, 4, 0, 4, 0, 0, 0, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 4, 1 ])
-    DinnerPlate.Map[5]  = ([  1, 4, 4, 4, 0, 0, 0, 4,22,22,22, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 4, 1 ])#
+    DinnerPlate.Map[1]  = ([  1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1 ])
+    DinnerPlate.Map[2]  = ([  1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1 ])
+    DinnerPlate.Map[3]  = ([  1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1 ])
+    DinnerPlate.Map[4]  = ([  1, 1, 1, 0, 0, 0, 0, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1 ])
+    DinnerPlate.Map[5]  = ([  1, 1, 0, 0, 0, 0, 0, 4,22,22,22, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1 ])#
     DinnerPlate.Map[6]  = ([  1, 0, 0, 0, 0, 0, 0, 4,21,21,21, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
     DinnerPlate.Map[7]  = ([  1, 0, 0, 0, 0, 0, 0, 4,20,20,20, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
     DinnerPlate.Map[8]  = ([  1, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
@@ -12868,12 +13037,12 @@ def CreateDinnerPlate(MapLevel):
     DinnerPlate.Map[15] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4,33,33, 4, 0, 0, 0, 0, 0, 0, 0, 1 ])
     DinnerPlate.Map[16] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4,33,33, 4, 0, 0, 0, 0, 0, 0, 0, 1 ])
     DinnerPlate.Map[17] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 1 ])
-    DinnerPlate.Map[18] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
-    DinnerPlate.Map[19] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ]) #
-    DinnerPlate.Map[20] = ([  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ])
-    DinnerPlate.Map[21] = ([  1, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 4, 1 ])
-    DinnerPlate.Map[22] = ([  1, 4, 4, 4, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 4, 1 ])
-    DinnerPlate.Map[23] = ([  1, 4, 4, 4, 0, 0, 0, 0, 0, 4, 4, 4, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 4, 4, 1 ])
+    DinnerPlate.Map[18] = ([  1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1 ])
+    DinnerPlate.Map[19] = ([  1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1 ]) #
+    DinnerPlate.Map[20] = ([  1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 8, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1 ])
+    DinnerPlate.Map[21] = ([  1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1 ])
+    DinnerPlate.Map[22] = ([  1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1 ])
+    DinnerPlate.Map[23] = ([  1, 0, 0, 0, 0, 1, 1, 0, 0, 4, 4, 4, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1 ])
     DinnerPlate.Map[24] = ([  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ])
 
 
@@ -13088,7 +13257,7 @@ def PlayOutbreak():
   NameCount    = 0
   Viruses      = []
   VirusCount   = 0
-  Virus        = af.EmptyObject("EmptyObject")
+  Virus        = af.EmptyObject('EmptyObject')
   VirusMaxCount       = 125 #if virus count reaches 75%, end level
   VirusDeleted        = 0
   DominanceCount      = 0
@@ -13169,8 +13338,8 @@ def PlayOutbreak():
   #----------------------
   af.SaveConfigData()
 
-  #LevelCount = random.randint(1,MaxLevel)
-  LevelCount = 28
+  LevelCount = random.randint(1,MaxLevel)
+  #LevelCount = 28
   
   
   DinnerPlate = CreateDinnerPlate(LevelCount)
@@ -13199,14 +13368,15 @@ def PlayOutbreak():
     gv.VirusMoves = gv.VirusMoves + 1
     
     #We will increase bottome speed 20 times over the course of a full game
+    #OldVirusTopSpeed is the maximum speed we want to use no matter what
     m,r = divmod(gv.VirusMoves, (gv.MaxVirusMoves / 20))
     if (r == 0):
       gv.VirusBottomSpeed = gv.VirusBottomSpeed -1
       gv.VirusTopSpeed    = gv.VirusTopSpeed -1
-      if (gv.VirusTopSpeed < 1):
-        gv.VirusTopSpeed = 1
-      if (gv.VirusBottomSpeed < 1):
-        gv.VirusBottomSpeed = 1
+      if (gv.VirusTopSpeed < OldVirusTopSpeed):
+        gv.VirusTopSpeed = OldVirusTopSpeed
+      if (gv.VirusBottomSpeed < OldVirusTopSpeed):
+        gv.VirusBottomSpeed = OldVirusTopSpeed
 
     #--------------------------------
     #Check for keyboard input      --
@@ -13223,8 +13393,8 @@ def PlayOutbreak():
         DinnerPlate.DebugPlayfield()
 
 
-    #update text window
-    print ("Moves:",gv.VirusMoves," VirusCount:",VirusCount,"NameCount:",NameCount,"      ",end="\r")      
+      #update text window
+      print ("Moves:",gv.VirusMoves," VirusCount:",VirusCount,"NameCount:",NameCount," gv.VirusTopSpeed:",gv.VirusTopSpeed," gv.VirusBottomSpeed:",gv.VirusBottomSpeed,"      ",end="\r")      
 
 
     
@@ -13271,27 +13441,18 @@ def PlayOutbreak():
         #print ("Virus name alive x:",Viruses[x].name,Viruses[x].alive,x)
         if (Viruses[x].alive == 1):
           MoveVirus(Viruses[x],DinnerPlate.Playfield)
-        else:
+        
+      #After a move, we need to see if it is still alive, becaus a lot of things could have happened
+      if (Viruses[x].alive == 0):
           #print ("Removing virus from the list: ",x)
-          del Viruses[x]
-          VirusCount = VirusCount -1
           #print ("VirusCount:",VirusCount)
-          VirusDeleted = 1
-          
+        VirusDeleted = 1
+        DinnerPlate.Playfield[(Viruses[x].v)][(Viruses[x].h)] = af.EmptyObject('EmptyObject')
+        #Viruses[x] = af.EmptyObject('EmptyObject')
+        del Viruses[x]
+        VirusCount = VirusCount -1
           
 
-      #----------------------
-      #-- Audit Playfield  --  
-      #----------------------
-      #There seems to be a bug where an old dead virus is still on the playfield.
-      #We will check periodically and remove them
-      if (random.randint(1,50) == 1):
-        for v in range(0,DinnerPlate.height):
-          for h in range(0,DinnerPlate.width):
-            if (DinnerPlate.Playfield[v][h].alive == 0 and DinnerPlate.Playfield[v][h].name != 'EmptyObject'):
-              #print('Zombie detected:',v,h,DinnerPlate.Playfield[v][h].name)
-              DinnerPlate.DebugPlayfield()
-              DinnerPlate.Playfield[v][h] = af.EmptyObject("EmptyObject")
 
   
       #if virus not deleted, replicate
@@ -13303,7 +13464,7 @@ def PlayOutbreak():
         #the main rate as an override
         if ((random.randint(0,Viruses[x].replicationrate) == 1) or (VirusCount == 1 and (random.randint(0,replicationrate) == 1))):
           Virus = ReplicateVirus(Viruses[x],DinnerPlate)
-          if (Virus.name != "EmptyObject"):
+          if (Virus.name != 'EmptyObject'):
             #print("Virus replicated")
             Viruses.append(Virus)
             VirusCount = len(Viruses)
@@ -13322,7 +13483,7 @@ def PlayOutbreak():
         if ((random.randint(0,Viruses[x].chanceofdying) == 1)):
           Viruses[x].alive = 0
           Viruses[x].lives = 0
-          Viruses[x] = af.EmptyObject("EmptyObject")
+          Viruses[x] = af.EmptyObject('EmptyObject')
           del Viruses[x]
           VirusCount = VirusCount -1
           #print ("VirusCount:",VirusCount)
@@ -13348,14 +13509,27 @@ def PlayOutbreak():
       x = x + 1
       
 
-      #---------------------------
-      #-- Move towards center   --
-      #---------------------------
+      
+
+      #-------------------------------
+      #-- Move towards random spot  --
+      #-------------------------------
       #
       if (random.randint(1,gv.ChanceOfHeadingToHV) == 1):
+        RandomH = random.randint(0,DinnerPlate.width)
+        RandomV = random.randint(0,DinnerPlate.height)
+
         for x in range(0,VirusCount):
-          Viruses[x].direction = af.PointTowardsObject8Way(Viruses[x].h,Viruses[x].v,(DinnerPlate.width/2),(DinnerPlate.height/2))
+          #Center
+          #Viruses[x].direction = af.PointTowardsObject8Way(Viruses[x].h,Viruses[x].v,(DinnerPlate.width/2),(DinnerPlate.height/2))
+
+          Viruses[x].direction = af.PointTowardsObject8Way(Viruses[x].h,Viruses[x].v,RandomH,RandomV)
+          Viruses[x].AdjustSpeed(10) 
+          Viruses[x].eating = 0
+          Viruses[x].clumping = True
           
+        print("Move Towards: ",RandomH,RandomV)
+        time.sleep(3)
 
 
 
@@ -13366,14 +13540,29 @@ def PlayOutbreak():
       #if too many virus strains, increase speed
       #otherwise reset to original speeds
       if(NameCount >= gv.VirusNameSpeedupCount):
-        gv.VirusTopSpeed    = 1
-        gv.VirusBottomSpeed = 1
+        gv.VirusTopSpeed    = OldVirusTopSpeed
+        gv.VirusBottomSpeed = OldVirusTopSpeed
         mutationdeathrate   = 1
       #else:
       #  gv.VirusTopSpeed    = OldVirusTopSpeed
       #  gv.VirusBottomSpeed = OldVirusBottomSpeed
 
     
+    #----------------------
+    #-- Audit Playfield  --  
+    #----------------------
+    #There seems to be a bug where an old dead virus is still on the playfield.
+    #We will check periodically and remove them
+    m,r = divmod(gv.VirusMoves,gv.AuditSpeed)
+    if(r == 0):
+      DinnerPlate.DebugPlayfield()
+      for v in range(0,DinnerPlate.height):
+        for h in range(0,DinnerPlate.width):
+          if (DinnerPlate.Playfield[v][h].alive == 0 and DinnerPlate.Playfield[v][h].name != 'EmptyObject'):
+            DinnerPlate.Playfield[v][h] = af.EmptyObject('EmptyObject')
+            #print('Zombie detected:',v,h,DinnerPlate.Playfield[v][h].name)
+
+
 
     #-------------------------------------------
     #-- Level ends when one virus dominates   --
@@ -13419,16 +13608,16 @@ def PlayOutbreak():
         LevelCount        = random.randint(1,MaxLevel)
         replicationrate   = gv.OriginalReplicationRate
         mutationdeathrate = gv.OriginalMutationDeathRate
-        DinnerPlate       = CreateDinnerPlate(LevelCount)
-        CameraH           = DinnerPlate.DisplayH
-        CameraV           = DinnerPlate.DisplayV
-        Viruses           = DinnerPlate.CopyMapToPlayfield()
-        VirusCount        = len(Viruses)
-        ClockSprite       = af.CreateClockSprite(12)
-        ClockSprite.on    = 0
-        DinnerPlate.DisplayWindowZoom(CameraH,CameraV,2,16,0.025)
         gv.VirusTopSpeed    = OldVirusTopSpeed
         gv.VirusBottomSpeed = OldVirusBottomSpeed
+        DinnerPlate         = CreateDinnerPlate(LevelCount)
+        CameraH             = DinnerPlate.DisplayH
+        CameraV             = DinnerPlate.DisplayV
+        Viruses             = DinnerPlate.CopyMapToPlayfield()
+        VirusCount          = len(Viruses)
+        ClockSprite         = af.CreateClockSprite(12)
+        ClockSprite.on      = 0
+        DinnerPlate.DisplayWindowZoom(CameraH,CameraV,2,16,0.025)
       
         nextname = ""
     else:
@@ -13739,7 +13928,7 @@ class ParticleWorld(object):
           self.Playfield[y][x].direction = 1
 
         else:
-          #print ("EmptyObject")
+          #print ('EmptyObject')
           self.Playfield[y][x] = af.EmptyObject('EmptyObject')
 
     return Particles;
@@ -13761,7 +13950,7 @@ class ParticleWorld(object):
         #print ("DisplayWindow hv HV: ",h,v,H,V) 
         name = self.Playfield[v+V][h+H].name
         #print ("Display: ",name,V,H)
-        if (name == "EmptyObject"):
+        if (name == 'EmptyObject'):
           r = 0
           g = 0
           b = 0          
@@ -13793,7 +13982,7 @@ class ParticleWorld(object):
          
         name = self.Playfield[v+V][h+H].name
         #print ("Display: ",name,V,H)
-        if (name == "EmptyObject"):
+        if (name == 'EmptyObject'):
           r = 0
           g = 0
           b = 0          
@@ -13828,7 +14017,7 @@ class ParticleWorld(object):
          
         name = self.Playfield[v+V][h+H].name
         #print ("Display: ",name,V,H)
-        if (name not in ("EmptyObject","Wall","WallBreakable")):
+        if (name not in ('EmptyObject',"Wall","WallBreakable")):
           count = count + 1
     return count;
 
@@ -13931,11 +14120,11 @@ def MoveParticle(Particle,Playfield):
   ItemList = []
   DoNothing = ""
   ScanDirection     = 1
-  WallInFront       = af.EmptyObject("EmptyObject")
-  ParticleInFront   = af.EmptyObject("EmptyObject")
-  ParticleInRear    = af.EmptyObject("EmptyObject")
-  ParticleLeftDiag  = af.EmptyObject("EmptyObject")
-  ParticleRightDiag = af.EmptyObject("EmptyObject")
+  WallInFront       = af.EmptyObject('EmptyObject')
+  ParticleInFront   = af.EmptyObject('EmptyObject')
+  ParticleInRear    = af.EmptyObject('EmptyObject')
+  ParticleLeftDiag  = af.EmptyObject('EmptyObject')
+  ParticleRightDiag = af.EmptyObject('EmptyObject')
   
   
 
@@ -13955,27 +14144,27 @@ def MoveParticle(Particle,Playfield):
 
   #Grab potential Particles in scan zones NW N NE S
   #Grab Particle in front
-  if (ItemList[1] != "Wall" and ItemList[1] != "WallBreakable" and ItemList[1] != "EmptyObject"):
+  if (ItemList[1] != "Wall" and ItemList[1] != "WallBreakable" and ItemList[1] != 'EmptyObject'):
     ScanH,ScanV = af.CalculateDotMovement8Way(h,v,Particle.direction)
     ParticleInFront = Playfield[ScanV][ScanH]
     #print ("ScanFront    ",ParticleInFront.name,ParticleLeftDiag.name,ParticleRightDiag.name,ParticleInRear.name)
 
   #Grab Particle left diagonal
-  if (ItemList[2] != "Wall" and ItemList[1] != "WallBreakable" and ItemList[2] != "EmptyObject"):
+  if (ItemList[2] != "Wall" and ItemList[1] != "WallBreakable" and ItemList[2] != 'EmptyObject'):
     ScanDirection = af.TurnLeft8Way(Particle.direction)
     ScanH,ScanV = af.CalculateDotMovement8Way(h,v,ScanDirection)
     ParticleLeftDiag = Playfield[ScanV][ScanH]
     #print ("ScanLeftDiag ",ParticleInFront.name,ParticleLeftDiag.name,ParticleRightDiag.name,ParticleInRear.name)
 
   #Grab Particle right diagonal
-  if (ItemList[3] != "Wall" and ItemList[1] != "WallBreakable" and ItemList[3] != "EmptyObject"):
+  if (ItemList[3] != "Wall" and ItemList[1] != "WallBreakable" and ItemList[3] != 'EmptyObject'):
     ScanDirection = af.TurnRight8Way(Particle.direction)
     ScanH,ScanV = af.CalculateDotMovement8Way(h,v,ScanDirection)
     ParticleRightDiag = Playfield[ScanV][ScanH]
     #print ("ScanRightDiag",ParticleInFront.name,ParticleLeftDiag.name,ParticleRightDiag.name,ParticleInRear.name)
   
         
-  if (ItemList[4] != "Wall" and ItemList[1] != "WallBreakable" and ItemList[4] != "EmptyObject"):
+  if (ItemList[4] != "Wall" and ItemList[1] != "WallBreakable" and ItemList[4] != 'EmptyObject'):
     ScanDirection = af.ReverseDirection8Way(Particle.direction)
     ScanH,ScanV   = af.CalculateDotMovement8Way(h,v,ScanDirection)
     ParticleInRear     = Playfield[ScanV][ScanH]
@@ -13992,14 +14181,14 @@ def MoveParticle(Particle,Playfield):
     #print ("Wall in front: ",WallInFront.name, WallInFront.lives)
     WallInFront.lives = WallInFront.lives -1
     if (WallInFront.lives <= 0):
-      Playfield[WallInFront.v][WallInFront.h] = af.EmptyObject("EmptyObject")
+      Playfield[WallInFront.v][WallInFront.h] = af.EmptyObject('EmptyObject')
 
 
   
 
   
   #If no Particles around, check for walls
-  #if (all("EmptyObject" == name for name in (ParticleInFront.name, ParticleLeftDiag.name, ParticleRightDiag.name, ParticleInRear.name))):
+  #if (all('EmptyObject' == name for name in (ParticleInFront.name, ParticleLeftDiag.name, ParticleRightDiag.name, ParticleInRear.name))):
    
 
   
@@ -14038,7 +14227,7 @@ def MoveParticle(Particle,Playfield):
 
     #Only move if the space decided upon is actually empty!
     ScanH,ScanV = af.CalculateDotMovement8Way(h,v,Particle.direction)
-    if (Playfield[ScanV][ScanH].name == "EmptyObject"):
+    if (Playfield[ScanV][ScanH].name == 'EmptyObject'):
       #print ("Spot moving to is empty ScanV ScanH",ScanV,ScanH)
       #print ("Particle moved!!!!!!!!!!!!!")
       Particle.h = ScanH
@@ -14046,7 +14235,7 @@ def MoveParticle(Particle,Playfield):
 
       #print ("Making Empty oldv oldh vh ",oldv,oldh,v,h)
       Playfield[ScanV][ScanH] = Particle
-      Playfield[oldv][oldh] = af.EmptyObject("EmptyObject")
+      Playfield[oldv][oldh] = af.EmptyObject('EmptyObject')
       #print ("Old spot:",Playfield[oldv][oldh].name)
     else:
       #print ("spot moving to is not empty: ",Playfield[ScanV][ScanH].name, ScanV,ScanH)
@@ -14196,7 +14385,7 @@ def PlayOrbits():
   NameCount    = 0
   Particles      = []
   ParticleCount   = 0
-  Particle        = af.EmptyObject("EmptyObject")
+  Particle        = af.EmptyObject('EmptyObject')
   ParticleMaxCount  = 125 #if Particle count reaches 75%, end level
   ParticleDeleted   = 0
   ClockSprite       = af.CreateClockSprite(12)
@@ -14527,7 +14716,7 @@ def ErrorHandler(ErrorMessage,TraceMessage,AdditionalInfo):
   print("--------------------------------------------------------------")
   print("")
   print("")
-  af.ShowScrollingBanner("ERROR DETECTED!",af.HighRed,0.03)
+  af.ShowScrollingBanner2("ERROR DETECTED!",af.HighRed,0.03)
 
 
 
@@ -14595,12 +14784,12 @@ print("-----------------")
 
 
 print(TheRandomMessage)
-af.ShowScrollingBanner(TheRandomMessage,af.SDLowYellowR,af.SDLowYellowG,af.SDLowYellowB,gv.ScrollSleep )
-af.ShowScrollingBanner2(TheRandomMessage,af.MedYellow,gv.ScrollSleep )
+#af.ShowScrollingBanner(TheRandomMessage,af.SDLowYellowR,af.SDLowYellowG,af.SDLowYellowB,gv.ScrollSleep )
+#af.ShowScrollingBanner2(TheRandomMessage,af.MedYellow,gv.ScrollSleep )
 #ShowLongIntro(gv.ScrollSleep)
 
 
-#ShowIPAddress()
+
 
 
 
@@ -14627,33 +14816,31 @@ while (1==1):
     #PlayOrbits()
 
 
-    ActivateClockMode(10)    
-
+    
+    ActivateClockMode(600)    
+    PlayDotInvaders()
+    ActivateClockMode(600)    
+    
     PlayPacDot(NumDots)
-    ActivateClockMode(60)    
-
+    ActivateClockMode(600)    
 
     PlayOutbreak()
-    ActivateClockMode(60)    
-
-
-    PlayDotInvaders()
-    ActivateClockMode(60)    
+    ActivateClockMode(600)    
     
     PlaySpaceDot()
-    ActivateClockMode(60)    
+    ActivateClockMode(600)    
 
     PlaySuperWorms()
-    ActivateClockMode(60)    
+    ActivateClockMode(600)    
 
     PlayRallyDot()
-    ActivateClockMode(60)    
+    ActivateClockMode(600)
 
     PlayDotZerk()
-    ActivateClockMode(60)    
+    ActivateClockMode(600)    
 
     PlayWormDot()
-    ActivateClockMode(60)    
+    ActivateClockMode(600)    
 
 
       
@@ -14662,7 +14849,7 @@ while (1==1):
     AdditionalInfo = "Error in Main section" 
     ErrorHandler(ErrorMessage,TraceMessage,AdditionalInfo)
     unicorn.clear()
-    af.ShowScrollingBanner("Display Error!  Restarting Clock",100,0,0,0.05)
+    af.ShowScrollingBanner("Display Error!  Restarting Clock",255,0,0,0.05)
     
 
 
